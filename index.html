@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBX Field Guide — draft chooser</title>
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:Georgia, 'Times New Roman', serif; background:#f3ecdb; color:#2b241c; padding:60px 24px; }
+  .wrap{ max-width:920px; margin:0 auto; }
+  h1{ font-size:2rem; }
+  p.lede{ margin-top:12px; color:#5c5342; max-width:640px; font-family:Arial, sans-serif; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-top:40px; }
+  a.card{ display:block; background:#fffcf4; border:1px solid #d9c9a3; border-radius:10px; padding:26px 22px; text-decoration:none; color:#2b241c; box-shadow:0 8px 24px rgba(43,36,28,0.08); transition:transform 0.15s ease; }
+  a.card:hover{ transform:translateY(-3px); border-color:#a13d2b; }
+  a.card .letter{ font-family:Arial, sans-serif; font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; color:#a13d2b; }
+  a.card h2{ font-size:1.3rem; margin-top:8px; }
+  a.card p{ margin-top:8px; font-family:Arial, sans-serif; font-size:0.92rem; color:#6b6155; line-height:1.5; }
+  footer{ margin-top:50px; font-family:Arial, sans-serif; font-size:0.8rem; color:#8a806e; max-width:640px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>OBX Field Guide — three drafts</h1>
+  <p class="lede">Same content, same idea — a field guide to the natural environments of the Outer Banks, not a tourist guide. Three different visual directions to react to.</p>
+  <div class="cards">
+    <a class="card" href="draft-a-field-notebook.html">
+      <div class="letter">Draft A</div>
+      <h2>Field Notebook</h2>
+      <p>Warm, paper-and-ink naturalist field guide feel. Serif type, cream palette, hand-annotated touches.</p>
+    </a>
+    <a class="card" href="draft-b-topographic-atlas.html">
+      <div class="letter">Draft B</div>
+      <h2>Topographic Atlas</h2>
+      <p>Dark chart-room feel — nautical/survey chart aesthetic, monospace labels, grid backdrop.</p>
+    </a>
+    <a class="card" href="draft-c-coastal-journey.html">
+      <div class="letter">Draft C</div>
+      <h2>Coastal Journey</h2>
+      <p>Light, photography-forward scrollytelling that drives the route north to south, zone by zone.</p>
+    </a>
+  </div>
+  <footer>All three are self-contained HTML files — open any of them directly, no build step required.</footer>
+</div>
+</body>
+</html>
