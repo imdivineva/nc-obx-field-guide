@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The OBX Explorer — a chart of the Outer Banks' natural zones</title>
+<meta name="description" content="A chart-style field guide to the natural environments of North Carolina's Outer Banks.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1a24;
+    --bg2:#0f2433;
+    --panel:#0d2130;
+    --ink:#e9f2f5;
+    --muted:#7fa3b8;
+    --grid:#1c3c50;
+    --line:#2c4d61;
+    --accent:#e8a33d;
+    --accent2:#49d3c8;
+    --danger:#e8623d;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', Arial, sans-serif;
+    line-height:1.65;
+  }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  h1,h2,h3,h4{ font-family:'IBM Plex Mono', monospace; font-weight:600; letter-spacing:0.01em; }
+  a{ color:var(--accent2); }
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 28px; }
+
+  header.site{
+    position:sticky; top:0; z-index:30;
+    background:rgba(11,26,36,0.92); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    padding:16px 0;
+  }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .brand .code{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--accent); letter-spacing:0.12em; }
+  .brand h1{ font-size:1.3rem; letter-spacing:0.02em; color:var(--ink); margin-top:2px; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:10px 22px; font-family:'IBM Plex Mono',monospace; font-size:0.78rem; }
+  html{ overflow-x:hidden; }
+  body{ overflow-x:hidden; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted); border-bottom:1px solid transparent; padding-bottom:3px; }
+  nav.site-nav a:hover{ color:var(--accent2); border-color:var(--accent2); }
+
+  .hero{ position:relative; margin:26px 0 8px; border:1px solid var(--line); overflow:hidden; }
+  .hero::before{ content:''; position:absolute; inset:0; border:1px solid rgba(73,211,200,0.25); margin:10px; pointer-events:none; z-index:2; }
+  .hero img{ width:100%; height:min(58vh,500px); object-fit:cover; display:block; filter:grayscale(0.15) contrast(1.08) brightness(0.85); }
+  .hero .overlay{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(6,15,22,0.92) 0%, rgba(6,15,22,0.35) 55%, rgba(6,15,22,0.1) 100%); display:flex; flex-direction:column; justify-content:flex-end; padding:34px; }
+  .hero .tag{ font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:0.8rem; letter-spacing:0.15em; text-transform:uppercase; }
+  .hero h2{ font-family:'IBM Plex Mono',monospace; font-size:clamp(1.4rem,3.6vw,2.2rem); max-width:820px; color:var(--ink); margin-top:8px; line-height:1.35; }
+  .hero p{ max-width:640px; margin-top:10px; color:var(--muted); font-size:0.98rem; }
+  .credit{ font-size:0.68rem; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
+  .credit a{ color:var(--muted); }
+  .hero .credit{ position:absolute; right:12px; bottom:8px; z-index:2; opacity:0.85; }
+
+  .intro{ margin:28px 0 4px; }
+  .intro p{ max-width:760px; color:var(--muted); }
+  .intro .flag{ display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--accent2); border:1px solid var(--line); padding:6px 10px; }
+
+  section{ padding:56px 0; border-top:1px solid var(--line); }
+  .sec-head{ margin-bottom:22px; display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+  .sec-head .idx{ font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:0.85rem; }
+  .sec-head h2{ font-size:1.35rem; color:var(--ink); }
+  .sec-head p{ max-width:680px; color:var(--muted); margin-top:6px; width:100%; }
+
+  .panel-card{ background:var(--panel); border:1px solid var(--line); padding:20px; position:relative; }
+  .panel-card::after{ content:'01'; position:absolute; top:8px; right:12px; font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:var(--line); }
+
+  svg.xsec{ width:100%; height:auto; display:block; }
+  .zone-band{ cursor:pointer; transition:opacity 0.15s ease, filter 0.15s ease; }
+  .zone-band:hover{ filter:brightness(1.25); }
+  .zone-band.active path, .zone-band.active polygon, .zone-band.active rect{ stroke:var(--accent) !important; stroke-width:2.5; }
+  .xsec-label{ font-family:'IBM Plex Mono',monospace; font-size:12px; fill:var(--ink); letter-spacing:0.04em; pointer-events:none; text-transform:uppercase; }
+  .xsec-code{ font-family:'IBM Plex Mono',monospace; font-size:10px; fill:var(--accent2); pointer-events:none; }
+  .xsec-hint{ text-align:right; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--muted); margin-top:8px; }
+
+  .zone-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1px; margin-top:1px; background:var(--line); border:1px solid var(--line); }
+  .zone-chip{ background:var(--panel); padding:14px 16px; cursor:pointer; }
+  .zone-chip:hover{ background:#12293a; }
+  .zone-chip .code{ font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--accent); }
+  .zone-chip .n{ font-family:'IBM Plex Mono',monospace; font-weight:600; margin-top:2px; }
+  .zone-chip .t{ font-size:0.82rem; color:var(--muted); margin-top:4px; }
+
+  .map-wrap{ background:var(--panel); border:1px solid var(--line); padding:22px; }
+  svg.chart{ width:100%; height:auto; }
+  .pin{ cursor:pointer; }
+  .pin rect{ fill:var(--bg2); stroke:var(--accent2); stroke-width:2; transition:transform 0.15s ease; transform-box:fill-box; transform-origin:center; }
+  .pin:hover rect{ transform:scale(1.3) rotate(45deg); }
+  .pin text{ font-family:'IBM Plex Mono',monospace; font-size:11px; fill:var(--ink); }
+  .chart-path{ fill:none; stroke:var(--line); stroke-width:26; stroke-linecap:round; }
+  .chart-path.core{ stroke:#173247; stroke-width:20; }
+  .bridge-mark{ stroke:var(--accent); stroke-width:2; stroke-dasharray:3 4; }
+  .compass{ opacity:0.5; }
+
+  .transect{ position:relative; }
+  .tstep{ display:grid; grid-template-columns:120px 1fr; gap:18px; padding:16px 0; border-bottom:1px solid var(--line); }
+  .tstep:last-child{ border-bottom:none; }
+  .tstep .stamp{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--muted); padding-top:3px; }
+  .tstep.bridge .stamp{ color:var(--accent); }
+  .tstep h4{ font-size:1rem; color:var(--ink); }
+  .tstep p{ margin-top:6px; color:var(--muted); font-size:0.94rem; max-width:680px; }
+
+  .backdrop{ position:fixed; inset:0; background:rgba(6,13,19,0.7); display:none; z-index:50; justify-content:flex-end; }
+  .backdrop.open{ display:flex; }
+  .panel{ background:var(--panel); width:min(480px,100%); max-height:100vh; overflow-y:auto; border-left:1px solid var(--accent2); box-shadow:-20px 0 50px rgba(0,0,0,0.5); }
+  .panel-photo{ position:relative; }
+  .panel-photo img{ width:100%; height:220px; object-fit:cover; display:block; filter:contrast(1.05); }
+  .panel-photo .credit{ position:absolute; right:8px; bottom:6px; color:#dceff0; background:rgba(6,13,19,0.55); padding:2px 6px; }
+  .panel-body{ padding:22px 26px 34px; }
+  .panel-body .code{ font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:0.78rem; letter-spacing:0.1em; }
+  .panel-body h3{ font-size:1.3rem; color:var(--ink); margin-top:4px; }
+  .panel-body .tagline{ color:var(--muted); margin-top:4px; margin-bottom:16px; font-size:0.92rem; }
+  .panel-body h5{ font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--accent2); margin:18px 0 6px; }
+  .panel-body h5::before{ content:'> '; }
+  .panel-body p, .panel-body li{ font-size:0.92rem; color:#c6dbe3; }
+  .vocab{ display:flex; flex-wrap:wrap; gap:6px; }
+  .vocab span{ background:var(--bg2); border:1px solid var(--line); padding:4px 10px; font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--ink); }
+  .close-btn{ position:sticky; top:10px; float:right; margin:10px 10px 0 0; background:var(--bg2); border:1px solid var(--line); color:var(--ink); width:32px; height:32px; font-size:1rem; cursor:pointer; z-index:2; }
+
+  footer{ border-top:1px solid var(--line); padding:26px 0 40px; margin-top:10px; }
+  footer .wrap{ display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  footer p{ font-size:0.8rem; color:var(--muted); max-width:600px; }
+  .credits-list{ font-family:'IBM Plex Mono',monospace; font-size:0.68rem; color:var(--muted); max-width:420px; }
+  .credits-list a{ color:var(--muted); }
+
+  @media (max-width:720px){
+    .hero .overlay{ padding:20px; }
+    section{ padding:38px 0; }
+    .tstep{ grid-template-columns:1fr; }
+    .panel{ width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">
+      <div class="code">CHART NO. OBX-01 // NC OUTER BANKS</div>
+      <h1>THE OBX EXPLORER</h1>
+    </div>
+    <nav class="site-nav">
+      <a href="#cross-section">CROSS-SECTION</a>
+      <a href="#map">CHART</a>
+      <a href="#bridges">CROSSINGS LOG</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/61/NASA-OuterBanks-NorthCarolina-ISS-20190423.jpg" alt="Satellite view of the Outer Banks barrier island chain from the International Space Station">
+    <div class="overlay">
+      <div class="tag">Orbital reference · NASA / ISS</div>
+      <h2>Every barrier island runs the same seven-zone transect. Learn to read it.</h2>
+      <p>A chart-style guide to the natural environments of the Outer Banks — definitions, boundary markers, and coordinates for standing inside each one.</p>
+    </div>
+    <span class="credit">NASA / ISS · public domain</span>
+  </div>
+
+  <div class="intro">
+    <p>From orbit the Outer Banks read as a single thin line. On the ground they resolve into seven repeating bands, ocean to sound — this chart plots all seven, plus the sound crossings where you can watch the transition happen from a moving car.</p>
+    <span class="flag">▸ start with the cross-section, below</span>
+  </div>
+</div>
+
+<section id="cross-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="idx">01 /</span>
+      <h2>CROSS-SECTION — OCEAN TO SOUND</h2>
+      <p>A schematic elevation, not to scale. Select any band for its definition, formation, field vocabulary, boundary markers, and coordinates.</p>
+    </div>
+    <div class="panel-card">
+      <svg class="xsec" viewBox="0 0 1600 460" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="1600" height="460" fill="#0d2130"/>
+        <g stroke="#1c3c50" stroke-width="1">
+          <line x1="0" y1="115" x2="1600" y2="115"/>
+          <line x1="0" y1="230" x2="1600" y2="230"/>
+          <line x1="0" y1="345" x2="1600" y2="345"/>
+        </g>
+
+        <g class="zone-band" data-zone="beach" onclick="openZone('beach')">
+          <polygon points="0,210 260,250 260,460 0,460" fill="#123244" stroke="#2c4d61"/>
+        </g>
+        <g class="zone-band" data-zone="beach" onclick="openZone('beach')">
+          <polygon points="230,255 340,260 340,460 230,460" fill="#2a3f34" stroke="#2c4d61"/>
+        </g>
+        <g class="zone-band" data-zone="foredune" onclick="openZone('foredune')">
+          <path d="M310,262 C360,262 380,150 430,150 C480,150 495,255 520,262 L520,460 L310,460 Z" fill="#3a4a34" stroke="#2c4d61"/>
+        </g>
+        <g class="zone-band" data-zone="thicket" onclick="openZone('thicket')">
+          <path d="M500,262 C560,235 600,205 660,200 C720,196 760,225 800,238 L800,460 L500,460 Z" fill="#33512f" stroke="#2c4d61"/>
+        </g>
+        <g class="zone-band" data-zone="forest" onclick="openZone('forest')">
+          <path d="M780,240 C820,150 860,95 920,90 C980,86 1000,130 1040,120 C1090,108 1110,150 1150,150 C1190,150 1205,200 1230,230 L1230,460 L780,460 Z" fill="#204429" stroke="#2c4d61"/>
+        </g>
+        <g class="zone-band" data-zone="marsh" onclick="openZone('marsh')">
+          <polygon points="1210,255 1400,268 1400,460 1210,460" fill="#3c4a22" stroke="#2c4d61"/>
+        </g>
+        <g class="zone-band" data-zone="estuary" onclick="openZone('estuary')">
+          <polygon points="1380,262 1600,250 1600,460 1380,460" fill="#123244" stroke="#2c4d61"/>
+        </g>
+        <g class="zone-band" data-zone="inlet" onclick="openZone('inlet')">
+          <rect x="1465" y="55" width="128" height="42" fill="#0d2130" stroke="#e8a33d" stroke-width="1.5"/>
+          <text x="1529" y="80" text-anchor="middle" class="xsec-code" fill="#e8a33d">SEE: INLET (OFF-CHART)</text>
+        </g>
+
+        <path d="M0,210 Q60,200 130,212 T260,208" stroke="#49d3c8" stroke-width="1.5" fill="none" opacity="0.5"/>
+        <path d="M1380,262 Q1460,250 1520,258 T1600,250" stroke="#49d3c8" stroke-width="1.5" fill="none" opacity="0.5"/>
+
+        <text x="120" y="430" text-anchor="middle" class="xsec-code">ATLANTIC</text>
+        <text x="280" y="430" text-anchor="middle" class="xsec-label">BEACH</text>
+        <text x="415" y="430" text-anchor="middle" class="xsec-label">FOREDUNE</text>
+        <text x="650" y="430" text-anchor="middle" class="xsec-label">THICKET</text>
+        <text x="980" y="430" text-anchor="middle" class="xsec-label">MARITIME FOREST</text>
+        <text x="1290" y="430" text-anchor="middle" class="xsec-label">SALT MARSH</text>
+        <text x="1490" y="430" text-anchor="middle" class="xsec-code">SOUND</text>
+
+        <text x="20" y="30" class="xsec-code">◂ 0.0 MI — OCEAN BASELINE</text>
+        <text x="1580" y="30" class="xsec-code" text-anchor="end">SOUND SHORE — VARIABLE ▸</text>
+      </svg>
+      <div class="xsec-hint">CLICK A BAND TO EXPAND READOUT</div>
+    </div>
+    <div class="zone-grid" id="zoneGrid"></div>
+  </div>
+</section>
+
+<section id="map">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="idx">02 /</span>
+      <h2>CHART — CURRITUCK SOUND TO HATTERAS ISLAND</h2>
+      <p>Schematic, not navigational. Waypoints mark preserves, parks, and refuges where a given zone is easiest to walk into; dashed ticks mark sound crossings.</p>
+    </div>
+    <div class="map-wrap">
+      <svg class="chart" viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg">
+        <g class="compass" transform="translate(800,50)">
+          <circle r="28" fill="none" stroke="#49d3c8" stroke-width="1"/>
+          <line x1="0" y1="-28" x2="0" y2="28" stroke="#49d3c8" stroke-width="1"/>
+          <line x1="-28" y1="0" x2="28" y2="0" stroke="#49d3c8" stroke-width="1"/>
+          <text y="-34" text-anchor="middle" class="xsec-code" fill="#49d3c8">N</text>
+        </g>
+        <path class="chart-path" d="M120,30 C120,110 250,110 260,190 C270,270 130,270 140,350 C150,420 400,420 430,460"/>
+        <path class="chart-path core" d="M120,30 C120,110 250,110 260,190 C270,270 130,270 140,350 C150,420 400,420 430,460"/>
+
+        <line class="bridge-mark" x1="90" y1="70" x2="150" y2="70"/>
+        <line class="bridge-mark" x1="235" y1="235" x2="295" y2="215"/>
+        <line class="bridge-mark" x1="240" y1="330" x2="300" y2="345"/>
+
+        <g class="pin" onclick="openPlace('p1')" transform="translate(120,30)"><rect x="-8" y="-8" width="16" height="16"/><text x="18" y="5">CURRITUCK SND CROSSING</text></g>
+        <g class="pin" onclick="openPlace('p2')" transform="translate(150,100)"><rect x="-8" y="-8" width="16" height="16"/><text x="18" y="5">KITTY HAWK WOODS</text></g>
+        <g class="pin" onclick="openPlace('p3')" transform="translate(255,150)"><rect x="-8" y="-8" width="16" height="16"/><text x="18" y="5">JOCKEY'S RIDGE</text></g>
+        <g class="pin" onclick="openPlace('p4')" transform="translate(268,225)"><rect x="-8" y="-8" width="16" height="16"/><text x="18" y="5">NAGS HEAD WOODS</text></g>
+        <g class="pin" onclick="openPlace('p5')" transform="translate(180,270)"><rect x="-8" y="-8" width="16" height="16"/><text x="-150" y="5" text-anchor="end">ROANOKE SND CROSSING</text></g>
+        <g class="pin" onclick="openPlace('p6')" transform="translate(135,330)"><rect x="-8" y="-8" width="16" height="16"/><text x="18" y="5">PEA ISLAND NWR</text></g>
+        <g class="pin" onclick="openPlace('p7')" transform="translate(270,340)"><rect x="-8" y="-8" width="16" height="16"/><text x="18" y="5">OREGON INLET</text></g>
+        <g class="pin" onclick="openPlace('p8')" transform="translate(430,460)"><rect x="-8" y="-8" width="16" height="16"/><text x="18" y="5">BUXTON WOODS</text></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="bridges">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="idx">03 /</span>
+      <h2>CROSSINGS LOG — NORTH TO SOUTH</h2>
+      <p>What's actually happening beneath the car at each sound crossing, and what's visible from the road on either side of it.</p>
+    </div>
+    <div class="transect">
+      <div class="tstep bridge">
+        <div class="stamp">CROSSING<br>US-158</div>
+        <div>
+          <h4>Wright Memorial Bridge — Currituck Sound</h4>
+          <p>Nearly three miles over water that's almost entirely fresh, with no direct ocean inlet nearby. Watch the marsh grass: pale and brushy here means fresh, not salt.</p>
+        </div>
+      </div>
+      <div class="tstep">
+        <div class="stamp">ON ISLAND</div>
+        <div>
+          <h4>Kitty Hawk → Kill Devil Hills → Nags Head</h4>
+          <p>You're driving the cross-section sideways — beach and dune to the east, marsh to the west, maritime forest and Jockey's Ridge's bare dune field in between.</p>
+        </div>
+      </div>
+      <div class="tstep bridge">
+        <div class="stamp">CROSSING<br>US-64</div>
+        <div>
+          <h4>Washington Baum Bridge — Roanoke Sound</h4>
+          <p>Narrower and more brackish than Currituck, mixing Roanoke River fresh water with salt water entering from Oregon Inlet. Carries you onto Roanoke Island.</p>
+        </div>
+      </div>
+      <div class="tstep">
+        <div class="stamp">ON ISLAND</div>
+        <div>
+          <h4>Whalebone Junction → Bodie Island</h4>
+          <p>NC-12 turns south. Marsh crowds the road on the sound side almost immediately — less room here for forest to develop between ocean and sound.</p>
+        </div>
+      </div>
+      <div class="tstep bridge">
+        <div class="stamp">CROSSING<br>NC-12</div>
+        <div>
+          <h4>Marc Basnight Bridge — Oregon Inlet</h4>
+          <p>The one true inlet crossing on this run — ocean and sound water trade places on every tide here. At low tide, watch for exposed pale sand on both sides: the flood- and ebb-tide deltas.</p>
+        </div>
+      </div>
+      <div class="tstep">
+        <div class="stamp">NARROWEST</div>
+        <div>
+          <h4>Pea Island National Wildlife Refuge</h4>
+          <p>Almost no dune buffer — marsh and managed impoundments sit right against the road both sides. Best eye-level marsh view on the drive.</p>
+        </div>
+      </div>
+      <div class="tstep">
+        <div class="stamp">SOUTH END</div>
+        <div>
+          <h4>Rodanthe → Hatteras Island</h4>
+          <p>The island widens; the full sequence returns, ending in real maritime forest at Buxton Woods before NC-12 reaches Hatteras Inlet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="backdrop" id="backdrop" onclick="closeOnBackdrop(event)">
+  <div class="panel" id="panel"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>The OBX Explorer is an educational reference to the natural geography of the Outer Banks — not navigational, and not a substitute for official park or refuge guidance. Check current tide charts before entering tidal flats, marsh creeks, or inlet shorelines.</p>
+    <p class="credits-list">IMAGERY: NASA/ISS (public domain) · Jarek Tuszyński, bobistraveling, Fredlyfish4, Captain-tucker, Ken Lund, NC Wetlands, Vbofficial — via Wikimedia Commons, CC BY / CC BY-SA / public domain.</p>
+  </div>
+</footer>
+
+<script>
+const ZONES = {
+  beach: {
+    code: "ZONE 01",
+    name: "Beach & Shoreface",
+    tagline: "Where land loses the argument, twice a day.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Outer_Banks_-_Beach.jpg/1280px-Outer_Banks_-_Beach.jpg",
+    credit: "Jarek Tuszyński · CC BY-SA 3.0 · Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Outer_Banks_-_Beach.jpg",
+    definition: "The beach is the sand strip worked by the tide; the shoreface is the gently sloping, underwater apron just beyond it, where incoming waves first feel the bottom and start to break.",
+    formation: "Waves approach the coast and refract along it, driving a longshore current that carries sand up and down the beach continuously. There's no bedrock under a barrier island — just a moving pile of sand responding to every tide and every storm.",
+    vocab: ["swash / backwash", "berm", "wrack line", "longshore drift", "erosion scarp"],
+    boundaries: "Starts where the sand is regularly wet by waves, marked by the wrack line — shell, seaweed, and driftwood left by the most recent high tide. Ends at the toe of the foredune, usually a visible low ridge where beach grass takes over.",
+    stand: "Any national seashore beach access keeps this transition undeveloped and easy to read in one glance.",
+    bring: "Nothing required — just a tide chart, to date the wrack line."
+  },
+  foredune: {
+    code: "ZONE 02",
+    name: "Foredune",
+    tagline: "The island's sacrificial wall.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg/1280px-The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg",
+    credit: "bobistraveling · CC BY 2.0 · Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg",
+    definition: "The first wind-built ridge of sand behind the beach — a living barrier held together entirely by deep-rooted grass, not rock.",
+    formation: "Onshore wind lifts dry sand off the upper beach; sea oats trap it and keep growing up through the accumulating pile, knitting it together with roots as they go. The dune grows exactly as fast as its grass can keep climbing.",
+    vocab: ["sea oats", "overwash fan", "blowout", "dune scarp"],
+    boundaries: "Starts at the first continuous stand of sea oats above the beach. Ends at the crest, where the mix shifts from grass to low shrubs.",
+    stand: "Jockey's Ridge State Park — technically a large migrating dune field, but the only place to legally walk onto an active, wind-shaped dune.",
+    bring: "Closed shoes for hot midday sand. Elsewhere, stay on boardwalk crossovers — foot traffic kills the grass holding the dune together."
+  },
+  thicket: {
+    code: "ZONE 03",
+    name: "Dune Grassland & Shrub Thicket",
+    tagline: "The wind-sheared hedge.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg/1280px-Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg",
+    credit: "NC Wetlands · CC BY 2.0 · Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_(11).jpg",
+    definition: "Behind the foredune, secondary ridges support a dense, low thicket of salt-tolerant shrubs, sheared flat-topped by salt spray rather than by height or age.",
+    formation: "Salt spray kills any bud that pokes above the height the spray reaches, so shrubs like wax myrtle and yaupon holly grow sideways instead of up. The wind-sheared canopy's top height marks the local salt-spray line — in a few spots it arches into a tunnel exactly the shape of the wind that pruned it.",
+    vocab: ["salt pruning / salt shear", "wind-sheared canopy", "swale"],
+    boundaries: "Starts where sea oats give way to woody shrubs. Ends where that canopy first grows tall enough to cast real shade — the edge of the maritime forest.",
+    stand: "Boardwalk trails at Pea Island NWR and Currituck Banks Reserve cut straight through it, including true salt-pruned tunnels.",
+    bring: "Nothing special — binoculars if you like watching what moves through dense cover."
+  },
+  forest: {
+    code: "ZONE 04",
+    name: "Maritime Forest",
+    tagline: "A forest that only survives because it's hiding.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Buxton_Woods_Trail_1.jpg/1280px-Buxton_Woods_Trail_1.jpg",
+    credit: "Fredlyfish4 · CC BY-SA 4.0 · Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Buxton_Woods_Trail_1.jpg",
+    definition: "Once the outer shrub layer grows tall enough to block salt spray, a real forest canopy — live oak, loblolly pine, American holly — can grow in the sheltered interior.",
+    formation: "The salt-pruned shrub edge acts as a windbreak; everything behind it grows in its shadow, protected from salt and wind. Canopy height climbs the farther you walk from the ocean, leveling off deep in the interior, often around a freshwater interdune pond perched above salty groundwater.",
+    vocab: ["windward-pruned edge", "forest interior", "interdune pond"],
+    boundaries: "Starts abruptly at the first real tree shade. Deepens moving inland, then ends again at the marsh or sound edge on the island's back side.",
+    stand: "Nags Head Woods Ecological Preserve and Buxton Woods on Hatteras Island — both walkable on marked trails.",
+    bring: "Trail shoes, water, insect repellent — the shadiest, buggiest walks on the Banks in summer."
+  },
+  marsh: {
+    code: "ZONE 05",
+    name: "Salt Marsh",
+    tagline: "The grass that grows in salt water, twice a day.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg/1280px-Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg",
+    credit: "NC Wetlands · CC BY 2.0 · Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Scene_Pea_Island_NWR_ncwetlands_KG_(43).jpg",
+    definition: "On the sound side, where forest or open sand meets calm, tide-touched water, cordgrass marsh takes over — flat expanses of one grass tough enough to be flooded with salt water on every tide.",
+    formation: "Sound water is shallow and sheltered from ocean waves, so sediment settles instead of washing away, letting marsh grass root and build peat. Marsh occupies a specific in-between: too wet and salty for forest, too shallow and sheltered to be open water.",
+    vocab: ["low marsh (flooded daily)", "high marsh (\"marsh hay\")", "marsh peat", "tidal creek"],
+    boundaries: "Starts where dry ground turns consistently muddy and grass-dominated. The water-facing low marsh is taller and greener; the landward high marsh is shorter, duller, and floods only a few times a month.",
+    stand: "Pea Island NWR and the Currituck Banks National Estuarine Research Reserve — both boardwalked at eye level with the marsh.",
+    bring: "Closed water shoes for tidal creek edges, and a tide chart — the low/high marsh distinction only makes sense against the current tide."
+  },
+  estuary: {
+    code: "ZONE 06",
+    name: "Estuary / Sound",
+    tagline: "Where the river finally meets the sea, one sound at a time.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Pamlico_Sound_from_Buxton_sunset.jpg/1280px-Pamlico_Sound_from_Buxton_sunset.jpg",
+    credit: "Captain-tucker · CC BY-SA 3.0 · Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Pamlico_Sound_from_Buxton_sunset.jpg",
+    definition: "The sounds — Currituck, Albemarle, Roanoke, Pamlico, Croatan — are shallow lagoons trapped between the mainland and the barrier islands, together forming the second-largest estuary system in the continental US.",
+    formation: "Rivers draining northeastern North Carolina empty into these sounds, mixing with salt water entering through a handful of narrow ocean inlets. Because inlets are few and far apart, salinity changes gradually and unevenly across the system rather than at one clean line.",
+    vocab: ["brackish", "salinity gradient", "fetch", "estuary"],
+    boundaries: "Currituck Sound (north end) is nearly fresh — no direct ocean inlet nearby — supporting fresher marsh grasses instead of true cordgrass. Moving south into Pamlico Sound, water gets steadily saltier nearing the inlets.",
+    stand: "Any public sound-side access — Duck, Kitty Hawk, Manteo waterfront, or soundside beaches inside Cape Hatteras National Seashore. Look for calm, tea-to-green water and low wave height even in wind.",
+    bring: "This is the zone to get on the water — flat, sheltered conditions make it the easiest place on the Banks to kayak, canoe, or paddleboard. Outfitters near Manteo, Duck, and the Hatteras villages rent all three."
+  },
+  inlet: {
+    code: "ZONE 07",
+    name: "Tidal Flat & Inlet",
+    tagline: "The gap that keeps moving.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg/1280px-Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg",
+    credit: "Ken Lund · CC BY-SA 2.0 · Wikimedia Commons",
+    creditUrl: "https://commons.wikimedia.org/wiki/File:Oregon_Inlet,_Outer_Banks,_North_Carolina_(14261710228).jpg",
+    definition: "Inlets are breaks in the barrier chain where ocean and sound water trade places on every tide; the sand deltas on either side, exposed at low tide, are tidal flats.",
+    formation: "Tidal currents rushing through an inlet twice a day carry sand, dropping it as an ebb-tide delta on the ocean side and a flood-tide delta on the sound side as the current spreads out. Inlets are geologically temporary — storms close old ones and cut new ones.",
+    vocab: ["ebb-tide delta", "flood-tide delta", "tidal flat", "inlet migration"],
+    boundaries: "You're at an inlet wherever open water directly connects sound to ocean with visible current. Tidal flats are the pale, rippled sand just inside it, dry at low tide and gone at high tide.",
+    stand: "Oregon Inlet, either side of the Marc Basnight Bridge — Bodie Island side to the north, Pea Island / Rodanthe side to the south.",
+    bring: "A tide chart is essential — the same sandbar is a walkable flat at low tide and a dangerous current at high tide. Look, don't wade."
+  }
+};
+
+const PLACES = {
+  p1: { name: "Wright Memorial Bridge — Currituck Sound crossing", body: "Nearly three miles of almost-fresh water. Watch marsh grass color from the car: paler, brushier fresh marsh here vs. true green cordgrass farther south.", img: ZONES.estuary.img, credit: ZONES.estuary.credit, creditUrl: ZONES.estuary.creditUrl},
+  p2: { name: "Kitty Hawk Woods Coastal Reserve", body: "A maritime forest and marsh preserve where the island is still wide enough to hold the full sequence.", img: ZONES.forest.img, credit: ZONES.forest.credit, creditUrl: ZONES.forest.creditUrl },
+  p3: { name: "Jockey's Ridge State Park", body: "The tallest active dune system on the East Coast — a migrating dune field, best place on the Banks to stand on bare, wind-shaped sand.", img: ZONES.foredune.img, credit: ZONES.foredune.credit, creditUrl: ZONES.foredune.creditUrl },
+  p4: { name: "Nags Head Woods Ecological Preserve", body: "Over a thousand acres of maritime forest, dune, and freshwater pond — the clearest interior forest walk on the northern Banks.", img: ZONES.forest.img, credit: ZONES.forest.credit, creditUrl: ZONES.forest.creditUrl },
+  p5: { name: "Washington Baum Bridge — Roanoke Sound crossing", body: "Narrower, more brackish than Currituck, carrying you from Nags Head onto Roanoke Island.", img: ZONES.estuary.img, credit: ZONES.estuary.credit, creditUrl: ZONES.estuary.creditUrl },
+  p6: { name: "Pea Island National Wildlife Refuge", body: "The narrowest stretch of the drive — marsh and impoundments right against the road, boardwalked at eye level with the grass.", img: ZONES.marsh.img, credit: ZONES.marsh.credit, creditUrl: ZONES.marsh.creditUrl },
+  p7: { name: "Oregon Inlet", body: "The clearest inlet on the Banks: watch tidal flats on either side of the Marc Basnight Bridge go from exposed sand to open water and back, twice a day.", img: ZONES.inlet.img, credit: ZONES.inlet.credit, creditUrl: ZONES.inlet.creditUrl },
+  p8: { name: "Buxton Woods, Hatteras Island", body: "The largest maritime forest remaining on the Outer Banks, at the widest point of Hatteras Island.", img: ZONES.forest.img, credit: ZONES.forest.credit, creditUrl: ZONES.forest.creditUrl }
+};
+
+function panelHTML(code, title, tagline, img, credit, creditUrl, bodyHtml){
+  return `
+    <div class="panel-photo">
+      <img src="${img}" alt="${title}">
+      <span class="credit"><a href="${creditUrl}" target="_blank" rel="noopener">${credit}</a></span>
+    </div>
+    <div class="panel-body">
+      <button class="close-btn" onclick="closePanel()" aria-label="Close">×</button>
+      ${code ? `<div class="code">${code}</div>` : ''}
+      <h3>${title}</h3>
+      ${tagline ? `<div class="tagline">${tagline}</div>` : ''}
+      ${bodyHtml}
+    </div>
+  `;
+}
+
+function openZone(id){
+  const z = ZONES[id];
+  document.querySelectorAll('.zone-band').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll(`.zone-band[data-zone="${id}"]`).forEach(b=>b.classList.add('active'));
+  const body = `
+    <h5>DEFINITION</h5><p>${z.definition}</p>
+    <h5>FORMATION</h5><p>${z.formation}</p>
+    <h5>VOCABULARY</h5><div class="vocab">${z.vocab.map(v=>`<span>${v}</span>`).join('')}</div>
+    <h5>BOUNDARY MARKERS</h5><p>${z.boundaries}</p>
+    <h5>WHERE TO STAND</h5><p>${z.stand}</p>
+    <h5>WHAT TO BRING</h5><p>${z.bring}</p>
+  `;
+  document.getElementById('panel').innerHTML = panelHTML(z.code, z.name, z.tagline, z.img, z.credit, z.creditUrl, body);
+  document.getElementById('backdrop').classList.add('open');
+}
+
+function openPlace(id){
+  const p = PLACES[id];
+  const body = `<h5>FIELD NOTE</h5><p>${p.body}</p>`;
+  document.getElementById('panel').innerHTML = panelHTML('WAYPOINT', p.name, '', p.img, p.credit, p.creditUrl, body);
+  document.getElementById('backdrop').classList.add('open');
+}
+
+function closePanel(){ document.getElementById('backdrop').classList.remove('open'); document.querySelectorAll('.zone-band').forEach(b=>b.classList.remove('active')); }
+function closeOnBackdrop(e){ if(e.target.id === 'backdrop') closePanel(); }
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closePanel(); });
+
+const grid = document.getElementById('zoneGrid');
+Object.keys(ZONES).forEach(id=>{
+  const z = ZONES[id];
+  const div = document.createElement('div');
+  div.className = 'zone-chip';
+  div.onclick = ()=>openZone(id);
+  div.innerHTML = `<div class="code">${z.code}</div><div class="n">${z.name}</div><div class="t">${z.tagline}</div>`;
+  grid.appendChild(div);
+});
+</script>
+</body>
+</html>
