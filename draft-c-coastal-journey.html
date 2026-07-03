@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Outer Banks Field Guide — a journey through the natural zones of the OBX</title>
+<meta name="description" content="A north-to-south journey through the natural environments of North Carolina's Outer Banks.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf8f2;
+    --bg2:#f2ece0;
+    --ink:#241f18;
+    --muted:#6d6353;
+    --accent:#c1652f;
+    --accent2:#2f6f6a;
+    --line:#e4dbc8;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter', Arial, sans-serif; line-height:1.65; }
+  h1,h2,h3{ font-family:'Newsreader', Georgia, serif; font-weight:500; }
+  em{ font-style:italic; }
+  a{ color:var(--accent2); }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+  .narrow{ max-width:640px; }
+
+  header.site{ position:sticky; top:0; z-index:30; background:rgba(251,248,242,0.9); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); padding:16px 0; }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand{ font-family:'Newsreader',serif; font-size:1.25rem; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:10px 20px; font-size:0.88rem; }
+  html{ overflow-x:hidden; }
+  body{ overflow-x:hidden; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted); }
+  nav.site-nav a:hover{ color:var(--accent); }
+
+  /* hero */
+  .hero{ position:relative; height:min(80vh,660px); overflow:hidden; }
+  .hero img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .hero .overlay{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(20,16,10,0.72) 0%, rgba(20,16,10,0.2) 55%, rgba(20,16,10,0.05) 100%); display:flex; flex-direction:column; justify-content:flex-end; padding:48px 28px; }
+  .hero .inner{ max-width:1180px; margin:0 auto; width:100%; color:#fff; }
+  .hero .eyebrow{ font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase; color:#f0dcc4; }
+  .hero h1{ font-size:clamp(2rem,5vw,3.4rem); max-width:820px; margin-top:10px; line-height:1.15; }
+  .hero p{ max-width:600px; margin-top:14px; font-size:1.08rem; color:#f2ead9; }
+  .credit{ font-size:0.7rem; color:var(--muted); }
+  .credit a{ color:inherit; }
+  .hero .credit{ position:absolute; right:14px; bottom:10px; color:#f0e6d3; opacity:0.85; }
+
+  .intro{ padding:44px 0 10px; }
+  .intro p{ font-size:1.12rem; color:#453d2e; }
+  .intro .byline{ margin-top:10px; color:var(--muted); font-size:0.9rem; }
+
+  /* quick reference nav (cross-section) */
+  .quickref{ padding:30px 0 50px; }
+  .quickref .sec-label{ font-size:0.82rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent2); margin-bottom:6px; }
+  .quickref h2{ font-size:1.5rem; }
+  .quickref p.desc{ color:var(--muted); max-width:640px; margin-top:6px; }
+  .qr-card{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px; margin-top:20px; box-shadow:0 8px 24px rgba(36,31,24,0.05); }
+  svg.xsec{ width:100%; height:auto; display:block; }
+  .zone-band{ cursor:pointer; transition:filter 0.15s ease; }
+  .zone-band:hover{ filter:brightness(1.08) saturate(1.15); }
+  .xsec-label{ font-family:'Inter',sans-serif; font-size:12.5px; fill:#241f18; pointer-events:none; }
+  .xsec-hint{ text-align:center; font-size:0.85rem; color:var(--muted); margin-top:10px; }
+
+  /* journey */
+  .stop{ border-top:1px solid var(--line); padding:0 0 70px; }
+  .stop.tint{ background:var(--bg2); }
+  .stop-banner{ position:relative; height:46vh; min-height:320px; overflow:hidden; }
+  .stop-banner img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .stop-banner .credit{ position:absolute; right:12px; bottom:8px; color:#fff; background:rgba(20,16,10,0.4); padding:2px 6px; border-radius:4px; }
+  .stop-head{ max-width:1180px; margin:-46px auto 0; padding:0 28px; position:relative; z-index:2; }
+  .stop-card{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:22px 26px; box-shadow:0 10px 30px rgba(36,31,24,0.1); max-width:720px; }
+  .kind{ font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+  .stop-card h2{ font-size:1.9rem; margin-top:6px; }
+  .stop-card .tagline{ font-style:italic; color:var(--muted); margin-top:6px; font-size:1.05rem; }
+
+  .stop-body{ max-width:1180px; margin:34px auto 0; padding:0 28px; display:grid; grid-template-columns:1fr 300px; gap:44px; }
+  .stop-body .main p{ margin-bottom:16px; font-size:1.02rem; color:#372f24; }
+  .stop-body .main h4{ font-family:'Inter',sans-serif; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent2); margin:22px 0 8px; }
+  .sidebar{ font-size:0.92rem; }
+  .sidebar .box{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin-bottom:16px; }
+  .sidebar .box h5{ font-family:'Inter',sans-serif; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); margin-bottom:8px; }
+  .sidebar .vocab{ display:flex; flex-wrap:wrap; gap:6px; }
+  .sidebar .vocab span{ background:var(--bg2); border-radius:14px; padding:3px 10px; font-size:0.8rem; }
+  .sidebar p{ color:#443c2d; }
+
+  @media (max-width:860px){
+    .stop-body{ grid-template-columns:1fr; }
+    .stop-head{ margin-top:-30px; }
+    .stop-banner{ height:36vh; }
+  }
+
+  /* trip map */
+  .tripmap{ padding:60px 0; border-top:1px solid var(--line); }
+  .map-card{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:22px; box-shadow:0 8px 24px rgba(36,31,24,0.05); }
+  svg.ribbon{ width:100%; height:auto; }
+  .pin{ cursor:pointer; }
+  .pin circle{ fill:#fff; stroke:var(--accent); stroke-width:3; }
+  .pin text{ font-family:'Inter',sans-serif; font-size:12.5px; fill:var(--ink); }
+  .ribbon-path{ fill:none; stroke:var(--line); stroke-width:34; stroke-linecap:round; }
+  .ribbon-path.core{ stroke:#efe6d2; stroke-width:28; }
+  .bridge-mark{ stroke:var(--accent2); stroke-width:3; stroke-dasharray:2 5; }
+
+  footer{ border-top:1px solid var(--line); padding:30px 0 44px; }
+  footer p{ font-size:0.85rem; color:var(--muted); max-width:640px; }
+  .credits-list{ font-size:0.72rem; color:var(--muted); max-width:460px; margin-top:10px; }
+  .credits-list a{ color:var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">The Outer Banks Field Guide</div>
+    <nav class="site-nav">
+      <a href="#quickref">Quick Reference</a>
+      <a href="#journey">The Journey</a>
+      <a href="#tripmap">Trip Map</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/61/NASA-OuterBanks-NorthCarolina-ISS-20190423.jpg" alt="Satellite view of the Outer Banks barrier island chain from the International Space Station">
+  <div class="overlay">
+    <div class="inner">
+      <div class="eyebrow">a field guide, driven north to south</div>
+      <h1>Every mile of the Outer Banks is a lesson in what built it.</h1>
+      <p>Follow the same route the highway takes — Currituck Sound to Hatteras Island — and learn to name what you're crossing as you cross it.</p>
+    </div>
+  </div>
+  <span class="credit">NASA / ISS · public domain</span>
+</div>
+
+<div class="wrap intro">
+  <p class="narrow">The Outer Banks are a single ribbon of sand carrying seven natural environments, ocean to sound, repeated over and over across two hundred miles. This guide follows one real route through them — the drive down US-158 and NC-12 — so each zone shows up exactly where you'd actually meet it.</p>
+  <div class="byline narrow">Jump to any stop below, or start with the quick-reference cross-section.</div>
+</div>
+
+<section class="quickref" id="quickref">
+  <div class="wrap">
+    <div class="sec-label">before you go</div>
+    <h2>The whole guide in one cross-section</h2>
+    <p class="desc">This is the sequence you'll meet, ocean to sound. Click a band to jump straight to that stop in the journey below.</p>
+    <div class="qr-card">
+      <svg class="xsec" viewBox="0 0 1600 400" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="1600" height="400" fill="#fbf8f2"/>
+        <g class="zone-band" onclick="location.hash='#stop-beach'">
+          <polygon points="0,190 260,225 260,400 0,400" fill="#b9d3d0"/>
+        </g>
+        <g class="zone-band" onclick="location.hash='#stop-beach'">
+          <polygon points="230,228 340,232 340,400 230,400" fill="#ecdfba"/>
+        </g>
+        <g class="zone-band" onclick="location.hash='#stop-foredune'">
+          <path d="M310,234 C360,234 380,132 430,132 C480,132 495,227 520,234 L520,400 L310,400 Z" fill="#dfcd92"/>
+        </g>
+        <g class="zone-band" onclick="location.hash='#stop-thicket'">
+          <path d="M500,234 C560,210 600,182 660,178 C720,174 760,200 800,212 L800,400 L500,400 Z" fill="#9bab63"/>
+        </g>
+        <g class="zone-band" onclick="location.hash='#stop-forest'">
+          <path d="M780,214 C820,132 860,82 920,78 C980,74 1000,114 1040,104 C1090,94 1110,132 1150,132 C1190,132 1205,176 1230,204 L1230,400 L780,400 Z" fill="#546f42"/>
+        </g>
+        <g class="zone-band" onclick="location.hash='#stop-marsh'">
+          <polygon points="1210,206 1400,220 1400,400 1210,400" fill="#c9c76c"/>
+        </g>
+        <g class="zone-band" onclick="location.hash='#stop-estuary'">
+          <polygon points="1380,232 1600,222 1600,400 1380,400" fill="#98bcc9"/>
+        </g>
+        <g class="zone-band" onclick="location.hash='#stop-inlet'">
+          <rect x="1465" y="40" width="128" height="38" rx="8" fill="#fff" stroke="#c1652f" stroke-width="1.5"/>
+          <text x="1529" y="64" text-anchor="middle" font-size="12" fill="#c1652f">↴ inlet, elsewhere</text>
+        </g>
+        <text x="120" y="380" text-anchor="middle" class="xsec-label">ocean</text>
+        <text x="280" y="380" text-anchor="middle" class="xsec-label">beach</text>
+        <text x="415" y="380" text-anchor="middle" class="xsec-label">foredune</text>
+        <text x="650" y="380" text-anchor="middle" class="xsec-label" fill="#fbf6e8">thicket</text>
+        <text x="980" y="380" text-anchor="middle" class="xsec-label" fill="#f2ead0">maritime forest</text>
+        <text x="1290" y="380" text-anchor="middle" class="xsec-label">salt marsh</text>
+        <text x="1490" y="380" text-anchor="middle" class="xsec-label">sound</text>
+      </svg>
+      <p class="xsec-hint">click a band to jump to that stop ↓</p>
+    </div>
+  </div>
+</section>
+
+<main id="journey">
+
+<div class="stop" id="stop-beach">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Outer_Banks_-_Beach.jpg/1280px-Outer_Banks_-_Beach.jpg" alt="Ocean beach on the Outer Banks">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Outer_Banks_-_Beach.jpg" target="_blank" rel="noopener">Jarek Tuszyński · CC BY-SA 3.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">Start here — the edge itself</div>
+      <h2>Beach &amp; Shoreface</h2>
+      <div class="tagline">Where land loses the argument, twice a day.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>Before you cross a single bridge, start where every visitor does: the beach. It's easy to see as scenery and miss as geology. The beach is simply the sand strip worked directly by the tide; the <em>shoreface</em> is the gently sloping, underwater apron just beyond it, where incoming waves first feel the bottom and begin to break.</p>
+      <h4>How it forms</h4>
+      <p>Waves approach the coast and refract along it, driving a longshore current that carries sand up and down the beach continuously. There's no bedrock under a barrier island — just a moving pile of sand responding to every tide and every storm, which is why this zone can look completely different week to week.</p>
+      <h4>How to know where it ends</h4>
+      <p>Look for the <strong>wrack line</strong> — the ridge of shell, seaweed, and driftwood left by the most recent high tide — as the real starting marker of "land." The beach ends at the toe of the foredune, usually a visible low ridge where the first beach grass takes over.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Vocabulary</h5>
+        <div class="vocab"><span>swash / backwash</span><span>berm</span><span>wrack line</span><span>longshore drift</span><span>erosion scarp</span></div>
+      </div>
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>Any national seashore beach access keeps this transition undeveloped — look for the boardwalk that respects the dune line rather than cutting through it.</p>
+      </div>
+      <div class="box">
+        <h5>What to bring</h5>
+        <p>Nothing required — just a tide chart, so you know whether the wrack line in front of you is from this morning or several tides old.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stop tint" id="stop-estuary">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Pamlico_Sound_from_Buxton_sunset.jpg/1280px-Pamlico_Sound_from_Buxton_sunset.jpg" alt="Pamlico Sound at sunset">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Pamlico_Sound_from_Buxton_sunset.jpg" target="_blank" rel="noopener">Captain-tucker · CC BY-SA 3.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">Crossing — US-158, Wright Memorial Bridge</div>
+      <h2>Estuary &amp; Sound</h2>
+      <div class="tagline">Where the river finally meets the sea, one sound at a time.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>Leave the mainland at Point Harbor and you're on the bridge for nearly three miles, crossing <strong>Currituck Sound</strong> — the northernmost, and freshest, of the sounds behind the Outer Banks. The sounds — Currituck, Albemarle, Roanoke, Pamlico, Croatan — are vast, shallow lagoons trapped between the mainland and the barrier islands. Together they form the Albemarle-Pamlico estuary, the second-largest estuary system in the continental United States.</p>
+      <h4>How it forms</h4>
+      <p>Rivers draining much of northeastern North Carolina empty into these sounds, mixing with salt water that enters through a handful of narrow ocean inlets far to the south. Because those inlets are few and far apart, salinity changes gradually and unevenly across the whole system rather than at one clean line.</p>
+      <h4>How to know what you're looking at</h4>
+      <p>Currituck Sound is nearly fresh — no direct ocean inlet nearby — which you can tell because it supports paler, brushier fresh marsh grasses instead of true salt cordgrass. Moving south past Roanoke Island into Pamlico Sound, water gets steadily saltier as you near the inlets at Oregon and Hatteras.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Vocabulary</h5>
+        <div class="vocab"><span>brackish</span><span>salinity gradient</span><span>fetch</span><span>estuary</span></div>
+      </div>
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>Any public sound-side access — Duck, Kitty Hawk, the Manteo waterfront. Look for calm, tea-to-green water and much lower wave height than the ocean side, even in wind.</p>
+      </div>
+      <div class="box">
+        <h5>What to bring</h5>
+        <p>This is the zone to get on the water, not just look at it — flat, sheltered water makes it the easiest place on the Banks to kayak, canoe, or paddleboard. Outfitters near Manteo, Duck, and the Hatteras Island villages rent all three, plus small sailboats.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stop" id="stop-foredune">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg/1280px-The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg" alt="Sand dune at Jockey's Ridge State Park">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg" target="_blank" rel="noopener">bobistraveling · CC BY 2.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">On the island — Nags Head</div>
+      <h2>The Foredune</h2>
+      <div class="tagline">The island's sacrificial wall.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>You're across the sound now, and the ocean-facing edge of the island is the foredune — the first wind-built ridge of sand behind the beach, a living barrier held together entirely by deep-rooted grass, not rock.</p>
+      <h4>How it forms</h4>
+      <p>Onshore wind lifts dry sand off the upper beach; sea oats trap it and keep growing up through the accumulating pile, knitting it together with roots as they go. The dune grows exactly as fast as its grass can keep climbing — which is why a storm that kills the grass can undo decades of growth in a single tide.</p>
+      <h4>How to know where it ends</h4>
+      <p>It starts at the first continuous stand of sea oats above the beach, and ends at the crest, where the plant mix shifts from grass to low shrubs.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Vocabulary</h5>
+        <div class="vocab"><span>sea oats</span><span>overwash fan</span><span>blowout</span><span>dune scarp</span></div>
+      </div>
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>Jockey's Ridge State Park — technically a huge migrating dune field rather than a single foredune, but the only place on the Banks where you can legally walk right up onto active, wind-shaped sand.</p>
+      </div>
+      <div class="box">
+        <h5>What to bring</h5>
+        <p>Closed shoes — the open sand gets scorching by midday. Elsewhere on the Banks, stay on the boardwalk crossovers: foot traffic kills the exact grass holding the dune together.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stop tint" id="stop-thicket">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg/1280px-Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg" alt="Wind-pruned maritime shrub tunnel">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_(11).jpg" target="_blank" rel="noopener">NC Wetlands · CC BY 2.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">Just behind the dune</div>
+      <h2>Dune Grassland &amp; Shrub Thicket</h2>
+      <div class="tagline">The wind-sheared hedge.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>Cross over the foredune crest and the plant life changes fast — from grass to a dense, low thicket of salt-tolerant shrubs, sheared perfectly flat-topped by salt spray rather than by height or age.</p>
+      <h4>How it forms</h4>
+      <p>Salt spray carried on the wind kills any bud that pokes up above the height the spray reaches, so shrubs like wax myrtle and yaupon holly grow sideways instead of up. The result is a wind-sheared canopy whose top height marks the local salt-spray line — and in a few spots, like this one, it arches into a tunnel exactly the shape of the wind that pruned it.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Vocabulary</h5>
+        <div class="vocab"><span>salt pruning</span><span>wind-sheared canopy</span><span>swale</span></div>
+      </div>
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>The boardwalk trails at Pea Island National Wildlife Refuge and the Currituck Banks Reserve both cut straight through this zone, including true salt-pruned tunnels like the one above.</p>
+      </div>
+      <div class="box">
+        <h5>What to bring</h5>
+        <p>Nothing special — binoculars are worth having, since this dense cover is good habitat.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stop" id="stop-forest">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Buxton_Woods_Trail_1.jpg/1280px-Buxton_Woods_Trail_1.jpg" alt="Maritime forest trail at Buxton Woods">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Buxton_Woods_Trail_1.jpg" target="_blank" rel="noopener">Fredlyfish4 · CC BY-SA 4.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">Interior — Nags Head Woods</div>
+      <h2>Maritime Forest</h2>
+      <div class="tagline">A forest that only survives because it's hiding.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>Keep walking inland past the thicket and, at some point, you'll pass under real shade for the first time — live oak, loblolly pine, and American holly forming a true forest canopy in the sheltered island interior.</p>
+      <h4>How it forms</h4>
+      <p>The salt-pruned shrub edge you just walked through acts as a windbreak; everything behind it grows in that windbreak's shadow, protected from salt spray and wind. Canopy height quietly climbs the farther you walk from the ocean, leveling off deep in the interior, often around a freshwater interdune pond perched above the salty groundwater below.</p>
+      <h4>How to know where it ends</h4>
+      <p>It starts abruptly at that first real tree shade, deepens as you move inland, and ends again at the marsh or sound edge on the island's back side — the forest is a strip, not an interior you can get lost in.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Vocabulary</h5>
+        <div class="vocab"><span>windward-pruned edge</span><span>forest interior</span><span>interdune pond</span></div>
+      </div>
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>Nags Head Woods Ecological Preserve — over a thousand acres of maritime forest, dune, and freshwater pond on marked trails, the clearest interior-forest walk on the northern Banks.</p>
+      </div>
+      <div class="box">
+        <h5>What to bring</h5>
+        <p>Trail shoes, water, and insect repellent — these are the shadiest, buggiest walks on the Banks in summer.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stop tint" id="stop-marsh">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg/1280px-Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg" alt="Salt marsh at Pea Island National Wildlife Refuge">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Scene_Pea_Island_NWR_ncwetlands_KG_(43).jpg" target="_blank" rel="noopener">NC Wetlands · CC BY 2.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">Crossing — US-64, Washington Baum Bridge, then south on Bodie Island</div>
+      <h2>Salt Marsh</h2>
+      <div class="tagline">The grass that grows in salt water, twice a day.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>Cross the Washington Baum Bridge onto Roanoke Island — a narrower, more brackish sound than Currituck, mixing Roanoke River fresh water with salt water entering from Oregon Inlet — and continue south onto Bodie Island, where the sound side crowds close to the road almost immediately. This is salt marsh: flat expanses of a single grass tough enough to be flooded with salt water on every tide.</p>
+      <h4>How it forms</h4>
+      <p>Sound water is shallow and sheltered from ocean waves by the barrier islands, so sediment settles instead of washing away, letting marsh grass root and slowly build up peat over centuries. Marsh occupies a specific in-between: too wet and salty for forest, too shallow and sheltered to be open water.</p>
+      <h4>How to know what you're looking at</h4>
+      <p>The water-facing edge — <strong>low marsh</strong>, dominated by smooth cordgrass — is taller and greener, flooded on every tide. The landward edge — <strong>high marsh</strong>, or "marsh hay" — is shorter, duller, and only floods a few times a month. That color and height difference is how you tell which side of the marsh you're looking at.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Vocabulary</h5>
+        <div class="vocab"><span>low marsh</span><span>high marsh</span><span>marsh peat</span><span>tidal creek</span></div>
+      </div>
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>Pea Island National Wildlife Refuge and the Currituck Banks National Estuarine Research Reserve both have boardwalks that put you at eye level with the marsh without trampling it.</p>
+      </div>
+      <div class="box">
+        <h5>What to bring</h5>
+        <p>Closed water shoes if you'll wade a tidal creek edge, and a tide chart — the low/high marsh distinction only makes sense once you know where the tide currently sits.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stop" id="stop-inlet">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg/1280px-Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg" alt="Oregon Inlet, Outer Banks">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Oregon_Inlet,_Outer_Banks,_North_Carolina_(14261710228).jpg" target="_blank" rel="noopener">Ken Lund · CC BY-SA 2.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">Crossing — NC-12, Marc Basnight Bridge</div>
+      <h2>Tidal Flat &amp; Inlet</h2>
+      <div class="tagline">The gap that keeps moving.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>This bridge crosses the one true inlet on this stretch of the drive: a permanent, direct gap where ocean and sound water trade places on every tide, separating Bodie Island from Pea Island. Inlets like this are the breaks in the barrier chain; the sand deltas that form on either side, exposed at low tide, are tidal flats.</p>
+      <h4>How it forms</h4>
+      <p>Tidal currents rushing through an inlet twice a day carry sand with them, dropping it as an ebb-tide delta on the ocean side and a flood-tide delta on the sound side as the current slows and spreads out. Inlets are geologically temporary — storms can close old ones and cut new ones, which is part of why the island chain isn't the same shape it was a century ago.</p>
+      <h4>How to know what you're looking at</h4>
+      <p>Watch, at low tide, for pale, rippled sand exposed on both sides of the bridge — that's the tidal flat. At high tide it's gone, and the current through the gap itself is visibly faster than the water on either side of it.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Vocabulary</h5>
+        <div class="vocab"><span>ebb-tide delta</span><span>flood-tide delta</span><span>tidal flat</span><span>inlet migration</span></div>
+      </div>
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>Either side of the bridge — Bodie Island to the north, Pea Island / Rodanthe to the south — both have parking with tidal flats in view.</p>
+      </div>
+      <div class="box">
+        <h5>What to bring</h5>
+        <p>A tide chart is essential — the same sandbar can be a walkable flat at low tide and a swift, dangerous current at high tide. Inlet currents are genuinely hazardous: this is a look-don't-wade zone.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stop tint" id="stop-close">
+  <div class="stop-banner">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Bodie_Sound_from_Nags_Head_Woods_%284503852603%29.jpg/1280px-Bodie_Sound_from_Nags_Head_Woods_%284503852603%29.jpg" alt="View of Bodie Sound from the edge of Nags Head Woods">
+    <span class="credit"><a href="https://commons.wikimedia.org/wiki/File:Bodie_Sound_from_Nags_Head_Woods_(4503852603).jpg" target="_blank" rel="noopener">Jason Hollinger · CC BY 2.0</a></span>
+  </div>
+  <div class="stop-head">
+    <div class="stop-card">
+      <div class="kind">South end — Hatteras Island</div>
+      <h2>The Sequence, Once More</h2>
+      <div class="tagline">Buxton Woods, and the island widens again.</div>
+    </div>
+  </div>
+  <div class="stop-body">
+    <div class="main">
+      <p>Past Pea Island's narrow, marsh-crowded stretch, Hatteras Island widens and the full seven-zone sequence returns one more time — beach, foredune, thicket, and, at Buxton Woods, the largest maritime forest remaining on the Outer Banks. NC-12 finally ends at Hatteras Inlet, where the pattern that carried you the whole way south starts over on the next island.</p>
+      <p>That's the whole guide: the same seven zones, the same ocean-to-sound order, repeating for two hundred miles. Once you can name them, you can read almost any mile of the Outer Banks from the road.</p>
+    </div>
+    <div class="sidebar">
+      <div class="box">
+        <h5>Where to stand</h5>
+        <p>Buxton Woods, at the widest point of Hatteras Island — the best place on the southern Banks to walk the full forest interior.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<section class="tripmap" id="tripmap">
+  <div class="wrap">
+    <div class="sec-label">the route, summarized</div>
+    <h2>Trip map — Currituck Sound to Hatteras Island</h2>
+    <p class="desc" style="color:var(--muted); max-width:640px; margin-top:6px;">Every stop from this guide, in order. Click a point to jump back to it.</p>
+    <div class="map-card" style="margin-top:20px;">
+      <svg class="ribbon" viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg">
+        <path class="ribbon-path" d="M120,30 C120,110 250,110 260,190 C270,270 130,270 140,350 C150,420 400,420 430,460"/>
+        <path class="ribbon-path core" d="M120,30 C120,110 250,110 260,190 C270,270 130,270 140,350 C150,420 400,420 430,460"/>
+        <line class="bridge-mark" x1="90" y1="70" x2="150" y2="70"/>
+        <line class="bridge-mark" x1="235" y1="235" x2="295" y2="215"/>
+        <line class="bridge-mark" x1="240" y1="330" x2="300" y2="345"/>
+        <g class="pin" onclick="location.hash='#stop-estuary'" transform="translate(120,30)"><circle r="9"/><text x="16" y="5">Wright Memorial Bridge</text></g>
+        <g class="pin" onclick="location.hash='#stop-thicket'" transform="translate(150,100)"><circle r="9"/><text x="16" y="5">Kitty Hawk Woods</text></g>
+        <g class="pin" onclick="location.hash='#stop-foredune'" transform="translate(255,150)"><circle r="9"/><text x="16" y="5">Jockey's Ridge</text></g>
+        <g class="pin" onclick="location.hash='#stop-forest'" transform="translate(268,225)"><circle r="9"/><text x="16" y="5">Nags Head Woods</text></g>
+        <g class="pin" onclick="location.hash='#stop-marsh'" transform="translate(180,270)"><circle r="9"/><text x="-140" y="5" text-anchor="end">Washington Baum Bridge</text></g>
+        <g class="pin" onclick="location.hash='#stop-marsh'" transform="translate(135,330)"><circle r="9"/><text x="16" y="5">Pea Island NWR</text></g>
+        <g class="pin" onclick="location.hash='#stop-inlet'" transform="translate(270,340)"><circle r="9"/><text x="16" y="5">Oregon Inlet</text></g>
+        <g class="pin" onclick="location.hash='#stop-close'" transform="translate(430,460)"><circle r="9"/><text x="16" y="5">Buxton Woods, Hatteras Island</text></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>The Outer Banks Field Guide is an educational reference to the natural geography of the Outer Banks. It is not a substitute for official park or refuge guidance — always check current tide charts before walking tidal flats, marsh creeks, or inlet shorelines.</p>
+    <p class="credits-list">Photography: NASA/ISS (public domain) · Jarek Tuszyński, bobistraveling, Fredlyfish4, Captain-tucker, Ken Lund, NC Wetlands, Jason Hollinger — via Wikimedia Commons, CC BY / CC BY-SA / public domain. Full credits linked on each photo.</p>
+  </div>
+</footer>
+
+</body>
+</html>
