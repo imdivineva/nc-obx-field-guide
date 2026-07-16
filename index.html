@@ -4,25 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OBX Field Guide — draft chooser</title>
+<link rel="icon" href="data:,">
 <style>
   *{ margin:0; padding:0; box-sizing:border-box; }
   body{ font-family:Georgia, 'Times New Roman', serif; background:#f3ecdb; color:#2b241c; padding:60px 24px; }
-  .wrap{ max-width:920px; margin:0 auto; }
+  .wrap{ max-width:960px; margin:0 auto; }
   h1{ font-size:2rem; }
-  p.lede{ margin-top:12px; color:#5c5342; max-width:640px; font-family:Arial, sans-serif; }
-  .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-top:40px; }
+  p.lede{ margin-top:12px; color:#5c5342; max-width:680px; font-family:Arial, sans-serif; }
+  h2.group{ font-family:Arial, sans-serif; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; color:#a13d2b; margin-top:46px; }
+  p.group-note{ font-family:Arial, sans-serif; font-size:0.88rem; color:#6b6155; margin-top:6px; max-width:680px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-top:18px; }
   a.card{ display:block; background:#fffcf4; border:1px solid #d9c9a3; border-radius:10px; padding:26px 22px; text-decoration:none; color:#2b241c; box-shadow:0 8px 24px rgba(43,36,28,0.08); transition:transform 0.15s ease; }
   a.card:hover{ transform:translateY(-3px); border-color:#a13d2b; }
   a.card .letter{ font-family:Arial, sans-serif; font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase; color:#a13d2b; }
-  a.card h2{ font-size:1.3rem; margin-top:8px; }
+  a.card h2{ font-size:1.3rem; margin-top:8px; font-family:Georgia, 'Times New Roman', serif; text-transform:none; letter-spacing:0; color:#2b241c; }
   a.card p{ margin-top:8px; font-family:Arial, sans-serif; font-size:0.92rem; color:#6b6155; line-height:1.5; }
   footer{ margin-top:50px; font-family:Arial, sans-serif; font-size:0.8rem; color:#8a806e; max-width:640px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>OBX Field Guide — three drafts</h1>
-  <p class="lede">Same content, same idea — a field guide to the natural environments of the Outer Banks, not a tourist guide. Three different visual directions to react to.</p>
+  <h1>OBX Field Guide — six drafts</h1>
+  <p class="lede">Same underlying content — a field guide to the natural environments of the Outer Banks, not a tourist guide. Two families to react to: three editorial takes on the original concept, and three takes on a newer, tool-like concept the client's feedback pointed toward.</p>
+
+  <h2 class="group">Original concept — three editorial drafts</h2>
+  <p class="group-note">Article-style guides you read start to finish.</p>
   <div class="cards">
     <a class="card" href="draft-a-field-notebook.html">
       <div class="letter">Draft A</div>
@@ -40,7 +46,28 @@
       <p>Light, photography-forward scrollytelling that drives the route north to south, zone by zone.</p>
     </a>
   </div>
-  <footer>All three are self-contained HTML files — open any of them directly, no build step required.</footer>
+
+  <h2 class="group">New concept — three "field passport" drafts</h2>
+  <p class="group-note">Not just an article — a tool you'd actually keep open while driving: filter zones by how you'll reach them, log which ones you've stood in, and leave yourself notes. Progress is saved on your device. All three use warm, nature-toned palettes and real photography only, no illustrated maps or diagrams.</p>
+  <div class="cards">
+    <a class="card" href="draft-d-field-passport.html">
+      <div class="letter">Draft D</div>
+      <h2>Field Passport</h2>
+      <p>A dashboard-style checklist — all seven zones as filterable cards, a progress bar, and a "log it" toggle on each.</p>
+    </a>
+    <a class="card" href="draft-e-trail-journal.html">
+      <div class="letter">Draft E</div>
+      <h2>Trail Journal</h2>
+      <p>A personal, keepsake feel — polaroid-style photos, hand-lettered accents, ruled-paper notes, and stamps you collect as you go.</p>
+    </a>
+    <a class="card" href="draft-f-trail-companion.html">
+      <div class="letter">Draft F</div>
+      <h2>Trail Companion</h2>
+      <p>A stop-by-stop trip itinerary — one full-width zone at a time in order, with a trail-progress bar instead of a stat grid.</p>
+    </a>
+  </div>
+
+  <footer>All six are self-contained HTML files — open any of them directly, no build step required.</footer>
 </div>
 </body>
 </html>

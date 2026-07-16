@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBX Field Passport — track your Outer Banks zones</title>
+<meta name="description" content="An interactive checklist and field guide to the seven natural environments of North Carolina's Outer Banks — filter by how you'll reach each one, log what you've stood in, and keep your own notes.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f2e7;
+    --card:#fffdf7;
+    --ink:#2b2318;
+    --muted:#786c58;
+    --line:#e6dcc4;
+    --accent:#4c6b3c;
+    --accent-soft:#e9efdf;
+    --accent2:#c1652f;
+    --accent2-soft:#f7e3d3;
+    --shadow: 0 6px 20px rgba(43,35,24,0.09);
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; overflow-x:hidden; }
+  body{ background:var(--bg); color:var(--ink); font-family:'Manrope', Arial, sans-serif; line-height:1.55; overflow-x:hidden; }
+  h1,h2,h3,h4{ font-family:'Manrope', Arial, sans-serif; font-weight:800; letter-spacing:-0.01em; }
+  a{ color:var(--accent); }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 20px; }
+  button{ font-family:inherit; }
+
+  header.site{ position:sticky; top:0; z-index:40; background:rgba(247,242,231,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding:14px 0; }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .mark{ width:34px; height:34px; border-radius:10px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+  .brand .name{ font-size:1.05rem; font-weight:800; }
+  .brand .sub{ font-size:0.72rem; color:var(--muted); font-weight:600; letter-spacing:0.03em; text-transform:uppercase; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:8px 18px; font-size:0.88rem; font-weight:600; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted); }
+  nav.site-nav a:hover{ color:var(--accent); }
+
+  /* hero / stat bar */
+  .hero{ padding:30px 0 6px; }
+  .hero h1{ font-size:clamp(1.5rem,3.4vw,2.1rem); max-width:680px; }
+  .hero p{ max-width:600px; color:var(--muted); margin-top:10px; font-size:1rem; }
+
+  .passport{ margin-top:24px; background:linear-gradient(135deg,var(--accent) 0%,#33492a 100%); border-radius:16px; padding:22px 24px; color:#fff; box-shadow:var(--shadow); }
+  .passport-top{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+  .passport-top .label{ font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; opacity:0.85; font-weight:700; }
+  .passport-top .count{ font-size:1.9rem; font-weight:800; margin-top:2px; }
+  .passport-top .count span{ font-size:1.1rem; font-weight:600; opacity:0.85; }
+  .bar-track{ margin-top:14px; height:10px; border-radius:6px; background:rgba(255,255,255,0.25); overflow:hidden; }
+  .bar-fill{ height:100%; background:#fff; border-radius:6px; width:0%; transition:width 0.35s ease; }
+  .passport-hint{ margin-top:10px; font-size:0.82rem; opacity:0.85; }
+
+  /* filters */
+  .filters{ margin-top:28px; display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:0.84rem; font-weight:700; padding:8px 14px; border-radius:20px; cursor:pointer; transition:all 0.15s ease; }
+  .chip:hover{ border-color:var(--accent); }
+  .chip.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  section{ padding:36px 0; }
+  section.rule{ border-top:1px solid var(--line); }
+  .sec-head{ margin-bottom:18px; }
+  .sec-head .eyebrow{ font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); font-weight:700; }
+  .sec-head h2{ font-size:1.4rem; margin-top:4px; }
+  .sec-head p{ color:var(--muted); max-width:640px; margin-top:6px; font-size:0.95rem; }
+
+  /* zone cards */
+  .zone-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:20px; }
+  .zcard{ background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); transition:opacity 0.15s ease, transform 0.15s ease; display:flex; flex-direction:column; }
+  .zcard.hidden{ display:none; }
+  .zcard.logged{ outline:2px solid var(--accent); }
+  .zcard .thumb{ position:relative; height:150px; }
+  .zcard .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .zcard .thumb .credit{ position:absolute; right:8px; bottom:6px; font-size:0.62rem; color:#fff; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; }
+  .zcard .tags{ position:absolute; left:8px; top:8px; display:flex; gap:5px; flex-wrap:wrap; }
+  .tag{ font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; padding:3px 8px; border-radius:10px; background:rgba(255,255,255,0.92); color:var(--ink); }
+  .tag.tide{ background:var(--accent2-soft); color:var(--accent2); }
+  .zcard .body{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .zcard h3{ font-size:1.1rem; }
+  .zcard .tagline{ font-size:0.88rem; color:var(--muted); font-style:italic; }
+  .zcard .logrow{ display:flex; align-items:center; gap:8px; margin-top:2px; }
+  .zcard .logrow label{ display:flex; align-items:center; gap:8px; font-size:0.86rem; font-weight:700; cursor:pointer; }
+  .zcard .logrow input[type=checkbox]{ width:18px; height:18px; accent-color:var(--accent); cursor:pointer; }
+  .zcard details{ margin-top:4px; }
+  .zcard summary{ cursor:pointer; font-size:0.86rem; font-weight:700; color:var(--accent); list-style:none; }
+  .zcard summary::-webkit-details-marker{ display:none; }
+  .zcard summary::after{ content:'Read the field note ↓'; }
+  .zcard details[open] summary::after{ content:'Hide the field note ↑'; }
+  .zcard .detail-body{ margin-top:10px; font-size:0.9rem; color:#3a3122; }
+  .zcard .detail-body h5{ font-size:0.74rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--accent); margin:12px 0 4px; }
+  .zcard .detail-body h5:first-child{ margin-top:0; }
+  .zcard .vocab{ display:flex; flex-wrap:wrap; gap:6px; }
+  .zcard .vocab span{ background:var(--accent-soft); border-radius:12px; padding:3px 10px; font-size:0.78rem; }
+  .zcard .note-field{ margin-top:12px; }
+  .zcard .note-field label{ font-size:0.74rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); font-weight:700; }
+  .zcard textarea{ width:100%; margin-top:6px; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-family:inherit; font-size:0.86rem; resize:vertical; min-height:44px; background:#fbf8f1; }
+  .zcard textarea:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  /* route timeline */
+  .route{ margin-top:20px; display:flex; flex-direction:column; gap:0; }
+  .rstep{ display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--line); }
+  .rstep:last-child{ border-bottom:none; }
+  .rstep .check{ flex-shrink:0; padding-top:2px; }
+  .rstep .check input{ width:20px; height:20px; accent-color:var(--accent); cursor:pointer; }
+  .rstep .content h4{ font-size:0.98rem; }
+  .rstep .content .kind{ font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--accent2); font-weight:700; }
+  .rstep .content p{ font-size:0.9rem; color:var(--muted); margin-top:4px; max-width:680px; }
+  .rstep.done .content h4{ text-decoration:line-through; text-decoration-color:var(--line); }
+
+  footer{ border-top:1px solid var(--line); padding:26px 0 44px; margin-top:10px; }
+  footer .wrap{ display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; align-items:flex-start; }
+  footer p{ font-size:0.82rem; color:var(--muted); max-width:560px; }
+  .credits-list{ font-size:0.7rem; color:var(--muted); max-width:420px; margin-top:8px; }
+  .credits-list a{ color:var(--muted); }
+  .reset-btn{ border:1px solid var(--line); background:var(--card); color:var(--muted); font-size:0.82rem; font-weight:700; padding:9px 16px; border-radius:8px; cursor:pointer; white-space:nowrap; }
+  .reset-btn:hover{ border-color:var(--accent2); color:var(--accent2); }
+
+  @media (max-width:600px){
+    .passport-top{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">
+      <div class="mark">◈</div>
+      <div>
+        <div class="name">OBX Field Passport</div>
+        <div class="sub">interactive naturalist checklist</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="#zones">Zones</a>
+      <a href="#route">The Route</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <h1>Don't just visit the Outer Banks — log it, zone by zone.</h1>
+  <p>The same seven natural environments repeat ocean-to-sound along the whole 200-mile chain. Filter by how you'll get to each one, check them off as you go, and jot your own notes. Your progress is saved on this device.</p>
+
+  <div class="passport">
+    <div class="passport-top">
+      <div>
+        <div class="label">Zones logged</div>
+        <div class="count"><span id="zoneCount">0</span><span> / 7</span></div>
+      </div>
+      <div>
+        <div class="label">Bridges &amp; stretches crossed</div>
+        <div class="count"><span id="routeCount">0</span><span> / 7</span></div>
+      </div>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+    <div class="passport-hint">Tap "Log it" on a zone card once you've actually stood in it — the checklist below tracks the driving route separately.</div>
+  </div>
+
+  <div class="filters" id="filters">
+    <button class="chip active" data-tag="all">All zones</button>
+    <button class="chip" data-tag="walkable">Walkable</button>
+    <button class="chip" data-tag="drivable">Drive-by</button>
+    <button class="chip" data-tag="paddle">Paddle / boat</button>
+    <button class="chip" data-tag="tide">Tide-dependent</button>
+  </div>
+</div>
+
+<section id="zones">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">the seven zones</span>
+      <h2>Ocean to sound, in order</h2>
+      <p>Same sequence everywhere on the Banks. Expand a card for what it is, how it forms, and the best place to see it — then log it and leave yourself a note.</p>
+    </div>
+    <div class="zone-grid" id="zoneGrid"></div>
+  </div>
+</section>
+
+<section class="rule" id="route">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">what you can know from the driver's seat</span>
+      <h2>Driving the route, north to south</h2>
+      <p>Every sound crossing is a hard edge between zones. Check off each leg as you drive it, from the mainland down to Hatteras Island.</p>
+    </div>
+    <div class="route" id="routeList"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <p>The OBX Field Passport is an educational reference to the natural geography of the Outer Banks, not a substitute for official park or refuge guidance — always check current tide charts before walking tidal flats, marsh creeks, or inlet shorelines.</p>
+      <p class="credits-list">Photography: NASA/ISS (public domain) · Jarek Tuszyński, bobistraveling, Fredlyfish4, Captain-tucker, Ken Lund, NC Wetlands, Vbofficial — via Wikimedia Commons, CC BY / CC BY-SA / public domain. Full credits in each photo caption.</p>
+    </div>
+    <button class="reset-btn" id="resetBtn">Reset my passport</button>
+  </div>
+</footer>
+
+<script>
+const ZONES = [
+  { id:"beach", name:"Beach & Shoreface", tagline:"Where land loses the argument, twice a day.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Outer_Banks_-_Beach.jpg/1280px-Outer_Banks_-_Beach.jpg",
+    credit:"Jarek Tuszyński · CC BY-SA 3.0", tags:["walkable"],
+    definition:"The beach is the sand strip worked by the tide; the shoreface is the gently sloping, underwater apron just beyond it, where incoming waves first feel the bottom and start to break.",
+    formation:"Waves refract along the coast and drive a longshore current that carries sand up and down the beach continuously — there's no bedrock under a barrier island, just a moving pile of sand responding to every tide and storm.",
+    vocab:["swash / backwash","berm","wrack line","longshore drift"],
+    boundaries:"Starts at the wrack line — the ridge of shell and driftwood left by the last high tide. Ends at the toe of the foredune, where beach grass takes over.",
+    stand:"Any national seashore beach access keeps this transition undeveloped and easy to read in one glance." },
+  { id:"foredune", name:"Foredune", tagline:"The island's sacrificial wall.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg/1280px-The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg",
+    credit:"bobistraveling · CC BY 2.0", tags:["walkable"],
+    definition:"The first wind-built ridge of sand behind the beach — a living barrier held together entirely by deep-rooted grass, not rock.",
+    formation:"Onshore wind lifts dry sand off the upper beach; sea oats trap it and keep growing up through the pile, knitting it together with roots as it grows.",
+    vocab:["sea oats","overwash fan","blowout","dune scarp"],
+    boundaries:"Starts at the first continuous stand of sea oats above the beach. Ends at the crest, where grass gives way to low shrubs.",
+    stand:"Jockey's Ridge State Park, Nags Head — the only spot where you can legally walk right up onto an active, wind-shaped dune." },
+  { id:"thicket", name:"Dune Grassland & Shrub Thicket", tagline:"The wind-sheared hedge.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg/1280px-Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg",
+    credit:"NC Wetlands · CC BY 2.0", tags:["walkable"],
+    definition:"Secondary dune ridges behind the foredune support a dense, low thicket of salt-tolerant shrubs, sheared flat-topped by salt spray rather than by age.",
+    formation:"Salt spray kills any bud that pokes up above the height the spray reaches, so wax myrtle and yaupon holly grow sideways instead of up — the canopy top marks the local salt-spray line.",
+    vocab:["salt pruning","wind-sheared canopy","swale"],
+    boundaries:"Starts where sea oats give way to woody shrubs. Ends where the shrub canopy grows tall enough to cast real shade.",
+    stand:"Boardwalk trails at Pea Island NWR and Currituck Banks Reserve both cut through true salt-pruned tunnels." },
+  { id:"forest", name:"Maritime Forest", tagline:"A forest that only survives because it's hiding.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Buxton_Woods_Trail_1.jpg/1280px-Buxton_Woods_Trail_1.jpg",
+    credit:"Fredlyfish4 · CC BY-SA 4.0", tags:["walkable"],
+    definition:"Once the outer shrub layer blocks salt spray, a real forest canopy — live oak, loblolly pine, American holly — can grow in the sheltered interior.",
+    formation:"The salt-pruned shrub edge acts as a windbreak; canopy height quietly climbs the farther you walk from the ocean, often leveling off around a freshwater interdune pond.",
+    vocab:["windward-pruned edge","forest interior","interdune pond"],
+    boundaries:"Starts abruptly at the first real tree shade, deepens moving inland, then ends again at the marsh or sound edge.",
+    stand:"Nags Head Woods Ecological Preserve and Buxton Woods on Hatteras Island — both walkable on marked trails." },
+  { id:"marsh", name:"Salt Marsh", tagline:"The grass that grows in salt water, twice a day.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg/1280px-Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg",
+    credit:"NC Wetlands · CC BY 2.0", tags:["walkable","tide"],
+    definition:"On the sound side, cordgrass marsh takes over — flat expanses of one grass tough enough to be flooded with salt water on every tide.",
+    formation:"Sound water is shallow and sheltered from ocean waves, so sediment settles instead of washing away, letting marsh grass root and slowly build up peat.",
+    vocab:["low marsh (flooded daily)","high marsh (flooded on spring tides)","marsh peat","tidal creek"],
+    boundaries:"Starts where dry ground turns muddy and grass-dominated. The water-facing low marsh is taller and greener than the duller, landward high marsh.",
+    stand:"Pea Island NWR and Currituck Banks Reserve both have boardwalks at eye level with the grass — bring a tide chart, the low/high marsh distinction only makes sense once you know where the tide sits." },
+  { id:"estuary", name:"Estuary / Sound", tagline:"Where the river finally meets the sea, one sound at a time.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Pamlico_Sound_from_Buxton_sunset.jpg/1280px-Pamlico_Sound_from_Buxton_sunset.jpg",
+    credit:"Captain-tucker · CC BY-SA 3.0", tags:["paddle","drivable"],
+    definition:"The sounds — Currituck, Albemarle, Roanoke, Pamlico, Croatan — are shallow lagoons trapped between the mainland and the barrier islands, forming the second-largest estuarine system in the continental US.",
+    formation:"Rivers draining northeastern North Carolina empty into these sounds, mixing with salt water through a handful of narrow ocean inlets, so salinity changes gradually and unevenly across the system.",
+    vocab:["brackish","salinity gradient","fetch","estuary"],
+    boundaries:"Currituck Sound is nearly fresh at the north end; water gets steadily saltier moving south past Roanoke Island toward the inlets at Oregon and Hatteras.",
+    stand:"Any public sound-side access — Duck, Kitty Hawk, the Manteo waterfront. This is the zone to get on the water: outfitters near Manteo and Duck rent kayaks, canoes, and paddleboards." },
+  { id:"inlet", name:"Tidal Flat & Inlet", tagline:"The gap that keeps moving.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg/1280px-Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg",
+    credit:"Ken Lund · CC BY-SA 2.0", tags:["drivable","tide"],
+    definition:"Inlets are breaks in the barrier chain where ocean and sound water directly trade places on every tide; the sand deltas that form on either side, exposed at low tide, are tidal flats.",
+    formation:"Tidal currents rushing through an inlet carry sand with them, dropping it as deltas as the current slows — inlets are geologically temporary, and storms can close old ones and cut new ones.",
+    vocab:["ebb-tide delta","flood-tide delta","tidal flat","inlet migration"],
+    boundaries:"You're at an inlet wherever open water directly connects sound to ocean with a visible current. Tidal flats are the pale, rippled sand just inside it.",
+    stand:"Oregon Inlet, either side of the Marc Basnight Bridge. A tide chart is essential here — this is a look-don't-wade zone, inlet currents are genuinely hazardous." }
+];
+
+const ROUTE = [
+  { id:"r1", kind:"crossing", title:"Wright Memorial Bridge — Currituck Sound", text:"Nearly three miles of almost-fresh water. Watch the marsh grass color from the car: paler, brushier fresh marsh here versus true green cordgrass farther south." },
+  { id:"r2", kind:"stretch", title:"Kitty Hawk → Kill Devil Hills → Nags Head", text:"You're driving the full cross-section sideways: beach and dune to your east, maritime forest and shrub thicket in the middle, sound-side marsh to your west." },
+  { id:"r3", kind:"crossing", title:"Washington Baum Bridge — Roanoke Sound", text:"A narrower, more brackish sound than Currituck, carrying you from Nags Head onto Roanoke Island." },
+  { id:"r4", kind:"stretch", title:"Whalebone Junction → Bodie Island", text:"NC-12 turns south. Marsh crowds close to the road on the sound side almost immediately — the island narrows here." },
+  { id:"r5", kind:"crossing", title:"Marc Basnight Bridge — Oregon Inlet", text:"The one true inlet crossing on this stretch. At low tide, watch for pale tidal-flat sand exposed on both sides of the bridge." },
+  { id:"r6", kind:"stretch", title:"Pea Island National Wildlife Refuge", text:"Almost no dune buffer — marsh and managed impoundments sit right against the road on both sides." },
+  { id:"r7", kind:"stretch", title:"Rodanthe → Hatteras Island", text:"The island widens again and the full sequence returns, ending at real maritime forest at Buxton Woods." }
+];
+
+const STORE_KEY = "obxPassportV1";
+function loadState(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {zones:{},notes:{},route:{}}; }catch(e){ return {zones:{},notes:{},route:{}}; } }
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+let state = loadState();
+
+function updateStats(){
+  const zc = Object.values(state.zones).filter(Boolean).length;
+  const rc = Object.values(state.route).filter(Boolean).length;
+  document.getElementById('zoneCount').textContent = zc;
+  document.getElementById('routeCount').textContent = rc;
+  const pct = Math.round(((zc + rc) / (ZONES.length + ROUTE.length)) * 100);
+  document.getElementById('barFill').style.width = pct + '%';
+}
+
+function renderZones(){
+  const grid = document.getElementById('zoneGrid');
+  grid.innerHTML = '';
+  ZONES.forEach(z=>{
+    const logged = !!state.zones[z.id];
+    const note = state.notes[z.id] || '';
+    const card = document.createElement('div');
+    card.className = 'zcard' + (logged ? ' logged' : '');
+    card.dataset.tags = z.tags.join(',');
+    card.innerHTML = `
+      <div class="thumb">
+        <img src="${z.img}" alt="${z.name}">
+        <div class="credit">${z.credit}</div>
+        <div class="tags">${z.tags.map(t=>`<span class="tag${t==='tide'?' tide':''}">${tagLabel(t)}</span>`).join('')}</div>
+      </div>
+      <div class="body">
+        <div>
+          <h3>${z.name}</h3>
+          <div class="tagline">${z.tagline}</div>
+        </div>
+        <div class="logrow">
+          <label><input type="checkbox" data-zone="${z.id}" ${logged?'checked':''}> Log it — I've stood here</label>
+        </div>
+        <details>
+          <summary></summary>
+          <div class="detail-body">
+            <h5>What it is</h5><p>${z.definition}</p>
+            <h5>How it forms</h5><p>${z.formation}</p>
+            <h5>Vocabulary</h5><div class="vocab">${z.vocab.map(v=>`<span>${v}</span>`).join('')}</div>
+            <h5>How to know you're in it</h5><p>${z.boundaries}</p>
+            <h5>Where to stand</h5><p>${z.stand}</p>
+          </div>
+        </details>
+        <div class="note-field">
+          <label for="note-${z.id}">My notes</label>
+          <textarea id="note-${z.id}" data-note="${z.id}" placeholder="What did you actually see here?">${note}</textarea>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('input[type=checkbox][data-zone]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      const id = e.target.dataset.zone;
+      state.zones[id] = e.target.checked;
+      e.target.closest('.zcard').classList.toggle('logged', e.target.checked);
+      saveState(); updateStats();
+    });
+  });
+  grid.querySelectorAll('textarea[data-note]').forEach(ta=>{
+    ta.addEventListener('input', e=>{
+      state.notes[e.target.dataset.note] = e.target.value;
+      saveState();
+    });
+  });
+}
+
+function tagLabel(t){
+  return { walkable:"Walkable", drivable:"Drive-by", paddle:"Paddle / boat", tide:"Tide-dependent" }[t] || t;
+}
+
+function renderRoute(){
+  const list = document.getElementById('routeList');
+  list.innerHTML = '';
+  ROUTE.forEach(r=>{
+    const done = !!state.route[r.id];
+    const step = document.createElement('div');
+    step.className = 'rstep' + (done ? ' done' : '');
+    step.innerHTML = `
+      <div class="check"><input type="checkbox" data-route="${r.id}" ${done?'checked':''}></div>
+      <div class="content">
+        <span class="kind">${r.kind === 'crossing' ? 'bridge crossing' : 'driving stretch'}</span>
+        <h4>${r.title}</h4>
+        <p>${r.text}</p>
+      </div>
+    `;
+    list.appendChild(step);
+  });
+  list.querySelectorAll('input[type=checkbox][data-route]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      const id = e.target.dataset.route;
+      state.route[id] = e.target.checked;
+      e.target.closest('.rstep').classList.toggle('done', e.target.checked);
+      saveState(); updateStats();
+    });
+  });
+}
+
+document.getElementById('filters').addEventListener('click', e=>{
+  const btn = e.target.closest('.chip');
+  if(!btn) return;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const tag = btn.dataset.tag;
+  document.querySelectorAll('.zcard').forEach(card=>{
+    const tags = card.dataset.tags.split(',');
+    card.classList.toggle('hidden', tag !== 'all' && !tags.includes(tag));
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm('Clear all logged zones, crossed legs, and notes on this device?')){
+    state = {zones:{},notes:{},route:{}};
+    saveState();
+    renderZones(); renderRoute(); updateStats();
+  }
+});
+
+renderZones();
+renderRoute();
+updateStats();
+</script>
+</body>
+</html>
