@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBX Zone Finder — figure out where you're standing</title>
+<meta name="description" content="Answer three quick questions about what's around you to find out which of the Outer Banks' seven natural zones you're standing in, then log it and browse the rest.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf3e0;
+    --card:#fffcf3;
+    --ink:#2b2415;
+    --muted:#6e6247;
+    --line:#e6d9b8;
+    --accent:#c98a1f;
+    --accent-soft:#f7ecd3;
+    --accent2:#2f5233;
+    --accent2-soft:#e1e9df;
+    --shadow: 0 8px 22px rgba(43,36,21,0.1);
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; overflow-x:hidden; }
+  body{ background:var(--bg); color:var(--ink); font-family:'Manrope', Arial, sans-serif; line-height:1.55; overflow-x:hidden; }
+  h1,h2,h3,h4{ font-family:'Manrope', Arial, sans-serif; font-weight:800; letter-spacing:-0.01em; }
+  a{ color:var(--accent2); }
+  .wrap{ max-width:920px; margin:0 auto; padding:0 20px; }
+  button{ font-family:inherit; }
+
+  header.site{ position:sticky; top:0; z-index:40; background:rgba(250,243,224,0.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding:14px 0; }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .mark{ width:34px; height:34px; border-radius:10px; background:var(--accent2); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+  .brand .name{ font-size:1.05rem; font-weight:800; }
+  .brand .sub{ font-size:0.72rem; color:var(--muted); font-weight:600; letter-spacing:0.03em; text-transform:uppercase; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:8px 18px; font-size:0.88rem; font-weight:600; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted); }
+  nav.site-nav a:hover{ color:var(--accent2); }
+
+  .hero{ padding:30px 0 6px; }
+  .hero h1{ font-size:clamp(1.5rem,3.4vw,2.1rem); max-width:680px; }
+  .hero p{ max-width:620px; color:var(--muted); margin-top:10px; font-size:1rem; }
+
+  /* quiz card */
+  .quiz-wrap{ margin-top:26px; }
+  .quiz-card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:32px 30px; box-shadow:var(--shadow); text-align:center; }
+  .quiz-step-label{ font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent2); font-weight:700; }
+  .quiz-question{ font-size:1.4rem; margin-top:8px; max-width:520px; margin-left:auto; margin-right:auto; }
+  .quiz-options{ margin-top:24px; display:flex; flex-direction:column; gap:10px; max-width:440px; margin-left:auto; margin-right:auto; }
+  .quiz-opt{ background:var(--accent-soft); border:1px solid var(--line); border-radius:12px; padding:14px 18px; font-size:1rem; font-weight:700; cursor:pointer; text-align:left; transition:all 0.15s ease; }
+  .quiz-opt:hover{ background:var(--accent2); color:#fff; border-color:var(--accent2); }
+  .quiz-back{ margin-top:20px; font-size:0.85rem; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; }
+  .quiz-back:disabled{ visibility:hidden; }
+
+  /* result */
+  .result-card{ background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; box-shadow:var(--shadow); }
+  .result-photo{ position:relative; height:220px; }
+  .result-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .result-photo .credit{ position:absolute; right:10px; bottom:8px; font-size:0.65rem; color:#fff; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; }
+  .result-body{ padding:26px 30px 30px; }
+  .result-body .eyebrow{ font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); font-weight:700; }
+  .result-body h2{ font-size:1.8rem; margin-top:4px; }
+  .result-body .tagline{ font-style:italic; color:var(--muted); margin-top:4px; margin-bottom:16px; }
+  .result-body h5{ font-size:0.76rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--accent2); margin:16px 0 5px; }
+  .result-body h5:first-of-type{ margin-top:0; }
+  .result-body p{ font-size:0.98rem; color:#332b1a; }
+  .vocab{ display:flex; flex-wrap:wrap; gap:6px; }
+  .vocab span{ background:var(--accent2-soft); border-radius:12px; padding:3px 10px; font-size:0.8rem; }
+  .logrow{ margin-top:18px; display:flex; align-items:center; gap:10px; }
+  .logrow label{ display:flex; align-items:center; gap:8px; font-size:0.95rem; font-weight:700; cursor:pointer; }
+  .logrow input[type=checkbox]{ width:19px; height:19px; accent-color:var(--accent2); cursor:pointer; }
+  .note-field{ margin-top:14px; }
+  .note-field label{ font-size:0.76rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); font-weight:700; }
+  .result-body textarea{ width:100%; margin-top:6px; border:1px solid var(--line); border-radius:8px; padding:9px 11px; font-family:inherit; font-size:0.9rem; resize:vertical; min-height:48px; background:#fdf9ee; }
+  .result-actions{ margin-top:22px; display:flex; gap:10px; flex-wrap:wrap; }
+  .result-actions button{ border:1px solid var(--line); background:var(--accent-soft); color:var(--ink); font-size:0.86rem; font-weight:700; padding:10px 16px; border-radius:10px; cursor:pointer; }
+  .result-actions button.primary{ background:var(--accent2); color:#fff; border-color:var(--accent2); }
+
+  /* progress dots for quiz */
+  .quiz-progress{ display:flex; justify-content:center; gap:6px; margin-top:18px; }
+  .quiz-progress span{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .quiz-progress span.on{ background:var(--accent2); }
+
+  section{ padding:36px 0; }
+  section.rule{ border-top:1px solid var(--line); }
+  .sec-head{ margin-bottom:18px; display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .sec-head .eyebrow{ font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent2); font-weight:700; }
+  .sec-head h2{ font-size:1.4rem; margin-top:4px; }
+  .sec-head p{ color:var(--muted); max-width:640px; margin-top:6px; font-size:0.95rem; }
+  .stamp-count{ font-size:0.86rem; font-weight:700; color:var(--accent2); }
+
+  /* browse-all grid, compact */
+  .zone-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+  .zchip{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; cursor:pointer; box-shadow:0 2px 0 rgba(43,36,21,0.04); }
+  .zchip.logged{ outline:2px solid var(--accent2); }
+  .zchip:hover{ border-color:var(--accent2); }
+  .zchip .n{ font-weight:700; }
+  .zchip .t{ font-size:0.84rem; color:var(--muted); font-style:italic; margin-top:2px; }
+  .zchip .status{ margin-top:8px; font-size:0.74rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--accent2); }
+
+  footer{ border-top:1px solid var(--line); padding:26px 0 44px; margin-top:10px; }
+  footer p{ font-size:0.82rem; color:var(--muted); max-width:560px; }
+  .credits-list{ font-size:0.7rem; color:var(--muted); max-width:420px; margin-top:8px; }
+  .credits-list a{ color:var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">
+      <div class="mark">?</div>
+      <div>
+        <div class="name">OBX Zone Finder</div>
+        <div class="sub">figure out where you're standing</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="#browse">Browse all seven</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <h1>Don't know which zone you're in? Answer three quick questions.</h1>
+  <p>The Outer Banks repeat the same seven natural environments, ocean to sound, over and over. Instead of browsing all seven, tell us what's actually around you right now and we'll tell you where you're standing.</p>
+</div>
+
+<div class="wrap quiz-wrap">
+  <div class="quiz-card" id="quizCard"></div>
+</div>
+
+<section class="rule" id="browse">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <span class="eyebrow">already know, or just curious</span>
+        <h2>Browse all seven zones</h2>
+        <p>Click any zone to jump straight to its result card above.</p>
+      </div>
+      <span class="stamp-count"><span id="zoneCount">0</span> of 7 logged</span>
+    </div>
+    <div class="zone-grid" id="zoneGrid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>The OBX Zone Finder is an educational reference to the natural geography of the Outer Banks, not a substitute for official park or refuge guidance — always check current tide charts before walking tidal flats, marsh creeks, or inlet shorelines.</p>
+    <p class="credits-list">Photography: Jarek Tuszyński, bobistraveling, Fredlyfish4, Captain-tucker, Ken Lund, NC Wetlands — via Wikimedia Commons, CC BY / CC BY-SA. Full credits on each photo.</p>
+  </div>
+</footer>
+
+<script>
+const ZONES = {
+  beach: { name:"Beach & Shoreface", tagline:"Where land loses the argument, twice a day.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Outer_Banks_-_Beach.jpg/960px-Outer_Banks_-_Beach.jpg",
+    credit:"Jarek Tuszyński · CC BY-SA 3.0",
+    definition:"The beach is the sand strip worked by the tide; the shoreface is the gently sloping, underwater apron just beyond it, where incoming waves first feel the bottom and start to break.",
+    boundaries:"Starts at the wrack line — the ridge of shell and driftwood left by the last high tide. Ends at the toe of the foredune, where beach grass takes over.",
+    vocab:["swash / backwash","berm","wrack line","longshore drift"],
+    stand:"Any national seashore beach access keeps this transition undeveloped and easy to read in one glance." },
+  foredune: { name:"Foredune", tagline:"The island's sacrificial wall.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg/960px-The_Big_Dune_at_Jockey%27s_Ridge_State_Park.jpg",
+    credit:"bobistraveling · CC BY 2.0",
+    definition:"The first wind-built ridge of sand behind the beach — a living barrier held together entirely by deep-rooted grass, not rock.",
+    boundaries:"Starts at the first continuous stand of sea oats above the beach. Ends at the crest, where grass gives way to low shrubs.",
+    vocab:["sea oats","overwash fan","blowout","dune scarp"],
+    stand:"Jockey's Ridge State Park, Nags Head — the only spot where you can legally walk right up onto an active, wind-shaped dune." },
+  thicket: { name:"Dune Grassland & Shrub Thicket", tagline:"The wind-sheared hedge.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg/960px-Scene_maritime_tunnel_2_pea_island_NWR_ncwetlands_AM_%2811%29.jpg",
+    credit:"NC Wetlands · CC BY 2.0",
+    definition:"Secondary dune ridges behind the foredune support a dense, low thicket of salt-tolerant shrubs, sheared flat-topped by salt spray rather than by age.",
+    boundaries:"Starts where sea oats give way to woody shrubs. Ends where the shrub canopy grows tall enough to cast real shade.",
+    vocab:["salt pruning","wind-sheared canopy","swale"],
+    stand:"Boardwalk trails at Pea Island NWR and Currituck Banks Reserve both cut through true salt-pruned tunnels." },
+  forest: { name:"Maritime Forest", tagline:"A forest that only survives because it's hiding.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Buxton_Woods_Trail_1.jpg/960px-Buxton_Woods_Trail_1.jpg",
+    credit:"Fredlyfish4 · CC BY-SA 4.0",
+    definition:"Once the outer shrub layer blocks salt spray, a real forest canopy — live oak, loblolly pine, American holly — can grow in the sheltered interior.",
+    boundaries:"Starts abruptly at the first real tree shade, deepens moving inland, then ends again at the marsh or sound edge.",
+    vocab:["windward-pruned edge","forest interior","interdune pond"],
+    stand:"Nags Head Woods Ecological Preserve and Buxton Woods on Hatteras Island — both walkable on marked trails." },
+  marsh: { name:"Salt Marsh", tagline:"The grass that grows in salt water, twice a day.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg/960px-Scene_Pea_Island_NWR_ncwetlands_KG_%2843%29.jpg",
+    credit:"NC Wetlands · CC BY 2.0",
+    definition:"On the sound side, cordgrass marsh takes over — flat expanses of one grass tough enough to be flooded with salt water on every tide.",
+    boundaries:"Starts where dry ground turns muddy and grass-dominated. The water-facing low marsh is taller and greener than the duller, landward high marsh.",
+    vocab:["low marsh (flooded daily)","high marsh (flooded on spring tides)","marsh peat","tidal creek"],
+    stand:"Pea Island NWR and Currituck Banks Reserve both have boardwalks at eye level with the grass — bring a tide chart." },
+  estuary: { name:"Estuary / Sound", tagline:"Where the river finally meets the sea, one sound at a time.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Pamlico_Sound_from_Buxton_sunset.jpg/960px-Pamlico_Sound_from_Buxton_sunset.jpg",
+    credit:"Captain-tucker · CC BY-SA 3.0",
+    definition:"The sounds — Currituck, Albemarle, Roanoke, Pamlico, Croatan — are shallow lagoons trapped between the mainland and the barrier islands, forming the second-largest estuarine system in the continental US.",
+    boundaries:"Currituck Sound is nearly fresh at the north end; water gets steadily saltier moving south past Roanoke Island toward the inlets at Oregon and Hatteras.",
+    vocab:["brackish","salinity gradient","fetch","estuary"],
+    stand:"Any public sound-side access — Duck, Kitty Hawk, the Manteo waterfront. Outfitters nearby rent kayaks, canoes, and paddleboards." },
+  inlet: { name:"Tidal Flat & Inlet", tagline:"The gap that keeps moving.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg/960px-Oregon_Inlet%2C_Outer_Banks%2C_North_Carolina_%2814261710228%29.jpg",
+    credit:"Ken Lund · CC BY-SA 2.0",
+    definition:"Inlets are breaks in the barrier chain where ocean and sound water directly trade places on every tide; the sand deltas that form on either side, exposed at low tide, are tidal flats.",
+    boundaries:"You're at an inlet wherever open water directly connects sound to ocean with a visible current. Tidal flats are the pale, rippled sand just inside it.",
+    vocab:["ebb-tide delta","flood-tide delta","tidal flat","inlet migration"],
+    stand:"Oregon Inlet, either side of the Marc Basnight Bridge. A tide chart is essential — this is a look-don't-wade zone." }
+};
+
+const FLOW = {
+  start: { question:"What's under your feet right now?", options:[
+    {label:"Dry sand", next:"dryConditions"},
+    {label:"Wet sand — waves are reaching it", result:"beach"},
+    {label:"Mud, grass, or a boardwalk over water", next:"wetlandConditions"},
+    {label:"Solid ground, calm open water nearby", result:"estuary"}
+  ]},
+  dryConditions: { question:"What's growing right around you?", options:[
+    {label:"Nothing — just open sand and a big dune", result:"foredune"},
+    {label:"Low, wind-flattened shrubs", result:"thicket"},
+    {label:"Tall trees with real shade", result:"forest"}
+  ]},
+  wetlandConditions: { question:"Is the water moving through a channel, or still?", options:[
+    {label:"Still and grassy", result:"marsh"},
+    {label:"There's a visible current moving through a gap", result:"inlet"}
+  ]}
+};
+
+const STORE_KEY = "obxZoneFinderV1";
+function loadState(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {zones:{},notes:{}}; }catch(e){ return {zones:{},notes:{}}; } }
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+let state = loadState();
+let history = ['start'];
+
+function updateCount(){
+  document.getElementById('zoneCount').textContent = Object.values(state.zones).filter(Boolean).length;
+}
+
+function renderQuestion(stepId){
+  const step = FLOW[stepId];
+  const depth = stepId === 'start' ? 0 : (stepId === 'dryConditions' || stepId === 'wetlandConditions' ? 1 : 2);
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="quiz-step-label">Question ${history.length}</div>
+    <div class="quiz-question">${step.question}</div>
+    <div class="quiz-options">
+      ${step.options.map((o,i)=>`<button class="quiz-opt" data-i="${i}">${o.label}</button>`).join('')}
+    </div>
+    <div class="quiz-progress">
+      <span class="${depth>=0?'on':''}"></span><span class="${depth>=1?'on':''}"></span><span class="${depth>=2?'on':''}"></span>
+    </div>
+    <button class="quiz-back" id="quizBack" ${history.length<=1?'disabled':''}>← back up a question</button>
+  `;
+  card.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const opt = step.options[btn.dataset.i];
+      if(opt.result){ history.push(opt.result); renderResult(opt.result); }
+      else { history.push(opt.next); renderQuestion(opt.next); }
+    });
+  });
+  document.getElementById('quizBack').addEventListener('click', ()=>{
+    if(history.length <= 1) return;
+    history.pop();
+    const prev = history[history.length-1];
+    if(FLOW[prev]) renderQuestion(prev); else renderQuestion('start');
+  });
+}
+
+function renderResult(zoneId){
+  const z = ZONES[zoneId];
+  const logged = !!state.zones[zoneId];
+  const note = state.notes[zoneId] || '';
+  const card = document.getElementById('quizCard');
+  card.className = '';
+  card.innerHTML = `
+    <div class="result-card">
+      <div class="result-photo">
+        <img src="${z.img}" alt="${z.name}">
+        <span class="credit">${z.credit}</span>
+      </div>
+      <div class="result-body">
+        <span class="eyebrow">you're probably standing in</span>
+        <h2>${z.name}</h2>
+        <div class="tagline">${z.tagline}</div>
+        <h5>What it is</h5><p>${z.definition}</p>
+        <h5>How to know for sure</h5><p>${z.boundaries}</p>
+        <h5>Vocabulary</h5><div class="vocab">${z.vocab.map(v=>`<span>${v}</span>`).join('')}</div>
+        <h5>Where to stand</h5><p>${z.stand}</p>
+        <div class="logrow">
+          <label><input type="checkbox" id="resultLog" ${logged?'checked':''}> Log it — I've stood here</label>
+        </div>
+        <div class="note-field">
+          <label for="resultNote">My notes</label>
+          <textarea id="resultNote" placeholder="What did you actually see here?">${note}</textarea>
+        </div>
+        <div class="result-actions">
+          <button class="primary" id="startOver">Start over</button>
+          <button id="browseInstead">Browse all seven instead</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('resultLog').addEventListener('change', e=>{
+    state.zones[zoneId] = e.target.checked;
+    saveState(); updateCount(); renderZoneChips();
+  });
+  document.getElementById('resultNote').addEventListener('input', e=>{
+    state.notes[zoneId] = e.target.value;
+    saveState();
+  });
+  document.getElementById('startOver').addEventListener('click', ()=>{
+    history = ['start'];
+    renderQuestion('start');
+  });
+  document.getElementById('browseInstead').addEventListener('click', ()=>{
+    document.getElementById('browse').scrollIntoView({behavior:'smooth'});
+  });
+}
+
+function renderZoneChips(){
+  const grid = document.getElementById('zoneGrid');
+  grid.innerHTML = '';
+  Object.keys(ZONES).forEach(id=>{
+    const z = ZONES[id];
+    const logged = !!state.zones[id];
+    const div = document.createElement('div');
+    div.className = 'zchip' + (logged ? ' logged' : '');
+    div.innerHTML = `<div class="n">${z.name}</div><div class="t">${z.tagline}</div><div class="status">${logged ? '✓ logged' : 'not logged yet'}</div>`;
+    div.addEventListener('click', ()=>{
+      history = ['start', id];
+      renderResult(id);
+      document.getElementById('quizCard').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+    grid.appendChild(div);
+  });
+}
+
+renderQuestion('start');
+renderZoneChips();
+updateCount();
+</script>
+</body>
+</html>
