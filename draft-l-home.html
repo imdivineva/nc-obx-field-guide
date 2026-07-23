@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Outer Banks Field Guide — a road trip, not a taxonomy</title>
+<meta name="description" content="Two road trips that teach North Carolina's coast the way you'd actually experience it: driving there, and driving the length of it.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f6f2;
+    --panel:#ffffff;
+    --ink:#1e2420;
+    --muted:#6b7268;
+    --accent:#2f7d5c;
+    --accent2:#c1652f;
+    --line:#dde1da;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; overflow-x:hidden; }
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter', Arial, sans-serif; line-height:1.55; overflow-x:hidden; }
+  h1,h2,h3{ font-family:'Inter',sans-serif; font-weight:700; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:var(--accent); }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 24px; }
+  .narrow{ max-width:640px; }
+  img{ display:block; max-width:100%; }
+
+  header.site{ position:sticky; top:0; z-index:40; background:rgba(245,246,242,0.96); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); padding:14px 0; }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand{ font-size:1.05rem; font-weight:700; }
+  .brand small{ display:block; font-family:'IBM Plex Mono',monospace; font-size:0.66rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--muted); font-weight:500; margin-top:2px; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:10px 18px; font-size:0.82rem; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted); font-weight:600; }
+  nav.site-nav a:hover{ color:var(--accent2); }
+
+  .intro{ padding:44px 0 10px; }
+  .intro .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.78rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent2); font-weight:600; }
+  .intro h1{ font-size:clamp(1.9rem,4.5vw,2.7rem); max-width:780px; margin-top:10px; }
+  .intro p{ max-width:660px; margin-top:14px; font-size:1.02rem; color:#3c4339; }
+
+  .entries{ padding:30px 0 40px; }
+  .entry-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:780px){ .entry-grid{ grid-template-columns:1fr; } }
+  a.entry{ display:block; background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; text-decoration:none; color:var(--ink); transition:transform 0.15s ease, box-shadow 0.15s ease; }
+  a.entry:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(30,36,32,0.1); }
+  a.entry .thumb{ position:relative; height:220px; overflow:hidden; }
+  a.entry .thumb img{ width:100%; height:100%; object-fit:cover; }
+  a.entry .thumb .credit{ position:absolute; right:8px; bottom:6px; font-size:0.65rem; color:#fff; background:rgba(20,20,16,0.5); padding:2px 6px; border-radius:4px; }
+  a.entry .body{ padding:20px 22px 24px; }
+  a.entry .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent2); font-weight:700; }
+  a.entry h2{ font-size:1.35rem; margin-top:8px; }
+  a.entry p{ margin-top:10px; font-size:0.92rem; color:var(--muted); }
+  a.entry .go{ margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:0.78rem; font-weight:700; color:var(--accent); display:inline-flex; align-items:center; gap:5px; }
+  a.entry .stats{ display:flex; gap:14px; margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--muted); }
+  a.entry .stats span strong{ color:var(--ink); }
+
+  .connective{ padding:10px 0 50px; }
+  .connective .box{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:22px 24px; max-width:840px; }
+  .connective .box p{ font-size:0.94rem; color:#2c322a; }
+  .connective .box p + p{ margin-top:10px; }
+
+  .placeholder-note{ margin-top:14px; font-size:0.8rem; color:var(--muted); background:#eef0ea; border:1px dashed var(--line); border-radius:6px; padding:10px 14px; max-width:640px; }
+
+  footer{ border-top:1px solid var(--line); padding:28px 0 40px; }
+  footer p{ font-size:0.82rem; color:var(--muted); max-width:640px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">The Outer Banks Field Guide
+      <small>Road-Trip Concept · Draft R — Route Log</small>
+    </div>
+    <nav class="site-nav">
+      <a href="draft-l-route-log.html">Journey 1 Log</a>
+      <a href="draft-l-down-the-banks.html">Journey 2 Log</a>
+      <a href="../index.html">All Drafts</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap intro">
+  <div class="eyebrow">Two logs, one coast</div>
+  <h1>North Carolina's coast, the way you'd actually meet it — from a car window.</h1>
+  <p class="narrow">Not the seven natural zones, arranged like an encyclopedia. Two mile-by-mile road logs, built to keep open while driving. At every stop: what to look for, what it is, and how long it lasts — log each one as you actually pass it.</p>
+</div>
+
+<section class="entries">
+  <div class="wrap entry-grid">
+    <a class="entry" href="draft-l-route-log.html">
+      <div class="thumb">
+        <img src="https://picsum.photos/seed/obx-home-r-journey1/900/700" alt="Placeholder — rolling Piedmont hills near Durham, NC">
+        <span class="credit">Placeholder photography</span>
+      </div>
+      <div class="body">
+        <div class="eyebrow">Journey 1 · Durham to Nags Head · US-64 East</div>
+        <h2>Watch North Carolina Become Coastal</h2>
+        <p>Begin among the hills and red clay of the Piedmont. Follow the land as it flattens, darkens, floods, opens into sounds, and finally narrows into the Outer Banks.</p>
+        <div class="stats"><span><strong>15</strong> stops</span><span><strong>~4 hrs</strong> drive</span><span><strong>1</strong> interactive crossing</span></div>
+        <div class="go">Open the log →</div>
+      </div>
+    </a>
+    <a class="entry" href="draft-l-down-the-banks.html">
+      <div class="thumb">
+        <img src="https://picsum.photos/seed/obx-home-r-journey2/900/700" alt="Placeholder — wide developed barrier island near Corolla, NC">
+        <span class="credit">Placeholder photography</span>
+      </div>
+      <div class="body">
+        <div class="eyebrow">Journey 2 · Corolla to Ocracoke · NC-12 South</div>
+        <h2>Travel the Length of the Banks</h2>
+        <p>Follow the barrier islands through maritime forests, beach towns, dunes, marshes, inlets, capes, storm-shaped islands, and a ferry crossing to Ocracoke.</p>
+        <div class="stats"><span><strong>15</strong> stops</span><span><strong>~3 hrs</strong> + ferry</span><span><strong>3</strong> optional extensions</span></div>
+        <div class="go">Open the log →</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section class="connective">
+  <div class="wrap">
+    <div class="box">
+      <p>Someone driving from Raleigh can follow Journey 1 in real time, stop by stop, all the way to the beach. Someone already staying in Nags Head can skip straight to Journey 2 and start reading the islands they're standing on.</p>
+      <p>Journey 1 covers how you enter the coastal system — inland Piedmont, through the Coastal Plain, into wetlands, an estuary, two sounds, and finally a barrier island. Journey 2 covers how to read the coastal system once you're inside it — how the islands themselves vary in width, development, vegetation, exposure, and orientation as you travel their length.</p>
+    </div>
+    <p class="placeholder-note">Photography throughout this concept is stand-in stock/placeholder imagery. Real on-location, correct-season photography should replace it before this concept moves forward. Logged progress on each journey is saved separately, on your device only.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Draft R — Route Log, homepage. Part of the OBX Field Guide road-trip concept, built from the client's road-trip brief.</p>
+  </div>
+</footer>
+
+</body>
+</html>

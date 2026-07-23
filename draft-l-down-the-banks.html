@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Down the Banks — a NC-12 route log</title>
+<meta name="description" content="Corolla to Ocracoke via NC-12 — a scannable, mile-by-mile road log for how the barrier islands themselves change from north to south. Log each stop as you drive it.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+  :root{
+    --bg:#f5f6f2;
+    --panel:#ffffff;
+    --ink:#1e2420;
+    --muted:#6b7268;
+    --accent:#2f7d5c;
+    --accent2:#c1652f;
+    --line:#dde1da;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; overflow-x:hidden; }
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter', Arial, sans-serif; line-height:1.55; overflow-x:hidden; }
+  h1,h2,h3{ font-family:'Inter',sans-serif; font-weight:700; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:var(--accent); }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 24px; }
+  .narrow{ max-width:640px; }
+  img{ display:block; max-width:100%; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  header.site{ position:sticky; top:0; z-index:40; background:rgba(245,246,242,0.96); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); padding:14px 0; }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand{ font-size:1.05rem; font-weight:700; }
+  .brand small{ display:block; font-family:'IBM Plex Mono',monospace; font-size:0.66rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--muted); font-weight:500; margin-top:2px; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:10px 18px; font-size:0.82rem; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted); font-weight:600; }
+  nav.site-nav a:hover{ color:var(--accent2); }
+
+  .progressbar{ position:sticky; top:60px; z-index:39; background:var(--panel); border-bottom:1px solid var(--line); padding:10px 0; }
+  .progressbar .wrap{ display:flex; align-items:center; gap:14px; }
+  .pbar-track{ flex:1; height:6px; background:var(--line); border-radius:3px; overflow:hidden; }
+  .pbar-fill{ height:100%; background:var(--accent); width:0%; transition:width 0.3s ease; }
+  .pbar-count{ font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--muted); white-space:nowrap; }
+  .pbar-count strong{ color:var(--accent); }
+  .resetbtn{ font-size:0.72rem; color:var(--muted); background:none; border:1px solid var(--line); border-radius:5px; padding:3px 9px; }
+
+  .routestrip{ position:sticky; top:97px; z-index:38; background:#eef0ea; border-bottom:1px solid var(--line); overflow-x:auto; white-space:nowrap; padding:8px 0; }
+  .routestrip::-webkit-scrollbar{ height:4px; }
+  .routestrip .wrap{ display:flex; align-items:center; gap:4px; padding:0 20px; }
+  .rs-stop{ position:relative; padding:5px 12px; font-size:0.74rem; color:var(--muted); border-radius:12px; flex:0 0 auto; font-weight:600; }
+  .rs-stop.active{ color:#fff; background:var(--accent2); }
+
+  .hero{ padding:40px 0 30px; }
+  .hero .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.78rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent2); font-weight:600; }
+  .hero h1{ font-size:clamp(1.9rem,4.5vw,2.9rem); margin-top:8px; max-width:760px; }
+  .hero p{ max-width:620px; margin-top:14px; font-size:1.02rem; color:#3c4339; }
+  .hero-img{ margin-top:24px; border-radius:10px; overflow:hidden; position:relative; height:280px; }
+  .hero-img img{ width:100%; height:100%; object-fit:cover; }
+  .credit{ font-size:0.68rem; color:var(--muted); }
+  .hero-img .credit{ position:absolute; right:10px; bottom:8px; color:#fff; background:rgba(20,20,16,0.5); padding:2px 6px; border-radius:4px; }
+  .placeholder-note{ margin-top:16px; font-size:0.8rem; color:var(--muted); background:#eef0ea; border:1px dashed var(--line); border-radius:6px; padding:10px 14px; max-width:640px; }
+
+  #stops{ padding:10px 0 20px; }
+  .stopcard{ background:var(--panel); border:1px solid var(--line); border-radius:10px; margin:18px 0; overflow:hidden; scroll-margin-top:220px; }
+  .stopcard-head{ padding:18px 22px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; }
+  .stopcard-head .meta{ flex:1; min-width:240px; }
+  .stopno{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--muted); font-weight:600; letter-spacing:0.03em; }
+  .whereami{ font-size:0.88rem; color:var(--muted); margin-top:6px; }
+  .whereami strong{ color:var(--ink); }
+  .stopcard h2{ font-size:1.35rem; margin-top:6px; }
+  .stopcard .scale{ font-size:0.92rem; color:#4a5148; margin-top:8px; max-width:560px; }
+  .logbtn{ background:var(--panel); border:1.5px solid var(--accent); color:var(--accent); font-weight:700; font-size:0.8rem; padding:8px 14px; border-radius:7px; white-space:nowrap; flex:0 0 auto; }
+  .logbtn.logged{ background:var(--accent); color:#fff; }
+
+  .tabs{ display:flex; gap:4px; padding:14px 22px 0; border-bottom:1px solid var(--line); }
+  .tabbtn{ background:none; border:none; border-bottom:2px solid transparent; padding:8px 4px 10px; margin-right:18px; font-size:0.82rem; font-weight:600; color:var(--muted); }
+  .tabbtn.active{ color:var(--accent2); border-bottom-color:var(--accent2); }
+  .tabpanels{ position:relative; }
+  .tabpanel{ display:none; }
+  .tabpanel.active{ display:block; }
+  .tabpanel img{ width:100%; height:320px; object-fit:cover; }
+  .tabpanel .maptier{ height:320px; }
+  .tabpanel .tabcaption{ padding:12px 22px; font-size:0.85rem; color:var(--muted); border-bottom:1px solid var(--line); }
+  .tabpanel .mapq{ font-size:0.85rem; color:var(--accent2); font-weight:700; }
+
+  .qrows{ padding:18px 22px 22px; }
+  .qrow{ display:grid; grid-template-columns:190px 1fr; gap:16px; padding:12px 0; border-bottom:1px solid var(--line); }
+  .qrow:last-child{ border-bottom:none; }
+  .qrow dt{ font-size:0.74rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:var(--accent); }
+  .qrow dd{ font-size:0.94rem; color:#2c322a; }
+  .qrow.duration{ background:#f2f5ee; margin:0 -22px -22px; padding:14px 22px; border-bottom:none; }
+  .qrow.duration dt{ color:var(--accent2); }
+
+  @media (max-width:700px){
+    .qrow{ grid-template-columns:1fr; gap:4px; }
+    .progressbar{ top:52px; }
+    .routestrip{ top:90px; }
+  }
+
+  .extensions{ padding:50px 0 20px; }
+  .ext-head{ margin-bottom:10px; }
+  .ext-head .sec-label{ font-family:'IBM Plex Mono',monospace; font-size:0.76rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent2); font-weight:600; }
+  .ext-head h2{ font-size:1.4rem; margin-top:6px; }
+  .ext-head p{ color:var(--muted); margin-top:8px; max-width:640px; font-size:0.94rem; }
+  .ext-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-top:20px; }
+  .ext-card{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px 20px; }
+  .ext-card .tag2{ font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent2); font-weight:700; }
+  .ext-card h3{ font-size:1.02rem; margin-top:8px; }
+  .ext-card p{ color:var(--muted); font-size:0.88rem; margin-top:8px; }
+
+  .tripmap{ padding:40px 0 60px; }
+  .map-card{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; }
+  #tripmap-el{ height:420px; border-radius:6px; }
+
+  footer{ border-top:1px solid var(--line); padding:28px 0 40px; }
+  footer p{ font-size:0.82rem; color:var(--muted); max-width:640px; }
+  .leaflet-popup-content h4{ margin:0 0 4px; font-size:0.95rem; }
+  .leaflet-popup-content p{ font-size:0.8rem; margin:0; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">The Outer Banks Field Guide
+      <small>Journey 2 · Draft O — Route Log</small>
+    </div>
+    <nav class="site-nav">
+      <a href="#stops">The Journey</a>
+      <a href="#extensions">Extensions</a>
+      <a href="#tripmap">Trip Map</a>
+      <a href="draft-l-route-log.html">Journey 1</a>
+      <a href="draft-l-home.html">Home</a>
+      <a href="../index.html">All Drafts</a>
+    </nav>
+  </div>
+</header>
+
+<div class="progressbar">
+  <div class="wrap">
+    <div class="pbar-track"><div class="pbar-fill" id="pbar-fill"></div></div>
+    <div class="pbar-count" id="pbar-count">0 / 15 logged</div>
+    <button class="resetbtn" id="resetlog">Reset log</button>
+  </div>
+</div>
+
+<div class="routestrip" id="routestrip"></div>
+
+<div class="wrap hero">
+  <div class="eyebrow">Journey 2 · Corolla to Ocracoke · NC-12 South</div>
+  <h1>Down the Banks</h1>
+  <p>A stop-by-stop road log for the barrier islands themselves — not how you arrive, but how the islands change as you go: width, development, vegetation, exposure, orientation. Tap "Log it" as you pass each stop; your progress is saved on this device.</p>
+  <div class="hero-img">
+    <img src="https://picsum.photos/seed/obx-o-hero-corolla/1400/700" alt="Placeholder — wide developed barrier island near Corolla, NC">
+    <span class="credit">Placeholder photography</span>
+  </div>
+  <p class="placeholder-note">Photography throughout this draft is stand-in stock/placeholder imagery, used to test layout and pacing. Real on-location, correct-season photography — the most important tier — should replace it before this concept moves forward.</p>
+</div>
+
+<div id="stops" class="wrap"></div>
+
+<section class="extensions" id="extensions">
+  <div class="wrap">
+    <div class="ext-head">
+      <div class="sec-label">Beyond the drivable route</div>
+      <h2>Optional extensions</h2>
+      <p>Offered separately rather than folded into the main route — each requires something other than an ordinary car to reach, and each raises complications (beach driving, a second ferry, a boat-only island) that don't belong inside a "northernmost to southernmost point" framing.</p>
+    </div>
+    <div class="ext-cards">
+      <div class="ext-card">
+        <div class="tag2">Wild Northern Extension</div>
+        <h3>Corolla → Carova</h3>
+        <p>For travelers with the right vehicle, the pavement isn't actually the end of the road. North of Corolla, a four-wheel-drive-only beach route continues to Carova, where wild horses roam among beachfront homes with no paved road at all.</p>
+      </div>
+      <div class="ext-card">
+        <div class="tag2">Beyond the Road</div>
+        <h3>Portsmouth Island &amp; Core Banks</h3>
+        <p>South of Ocracoke, the barrier island chain continues — but the road doesn't. Portsmouth Island and Core Banks are reachable only by boat, and represent some of the most remote, undeveloped barrier island in the state.</p>
+      </div>
+      <div class="ext-card">
+        <div class="tag2">National Scenic Byway continuation</div>
+        <h3>Ocracoke → Cedar Island</h3>
+        <p>The Outer Banks Scenic Byway doesn't end at Ocracoke. A second ferry continues from Ocracoke to Cedar Island, completing the designated byway back onto the mainland.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tripmap" id="tripmap">
+  <div class="wrap">
+    <div class="stopno">FULL ROUTE</div>
+    <h2 style="font-size:1.4rem;margin-top:6px;">Every stop, Corolla to Ocracoke</h2>
+    <p style="color:var(--muted);margin-top:6px;max-width:600px;font-size:0.92rem;">A real, pannable map — not an illustration — with every stop pinned in order. Click a pin to jump to that stop above.</p>
+    <div class="map-card" style="margin-top:16px;">
+      <div id="tripmap-el"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Draft O — Route Log, Journey 2. Part of the OBX Field Guide road-trip concept. Placeholder photography throughout; maps are real OpenStreetMap / Esri World Imagery data, not illustrations. Logged stops are saved only on this device.</p>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const JOURNEY = ["Corolla","Duck","Kitty Hawk","Kill Devil Hills","Nags Head","Oregon Inlet","Pea Island","Rodanthe · Waves · Salvo","Avon","Cape Hatteras","Frisco","Hatteras Village","Hatteras Inlet Ferry","Ocracoke"];
+
+const STOPS = [
+  { id:"corolla", routeLabel:"Corolla", location:"Corolla, NC — the developed north end of the drivable Banks", term:"Where the pavement — and this journey — begins",
+    scale:"Corolla is as far north as NC-12 goes without four-wheel drive; everything above it belongs to a different kind of trip entirely.",
+    lat:36.3768, lon:-75.8291, zoom:12, mapQuestion:"How wide is the island at Corolla, sound to ocean?",
+    q1:"Look at how wide the island feels here, and how much of what you see is rooftops and parking lots rather than open land.",
+    q2:"This is Corolla, the developed northern anchor of the drivable Outer Banks — a wide, heavily built barrier island stretch.",
+    q3:"The tell is density: shops, houses, and resort development crowd close to the road on both sides, with little open land visible from the highway itself.",
+    q4:"Corolla-to-Nags Head is one continuous, wide, developed run — among the most built-up barrier island stretches on the whole route south.",
+    q6:"Expect this developed character — houses and businesses close to the road — to continue for the next 20 miles or so, through Duck, Kitty Hawk, and Kill Devil Hills.",
+    photo1:{seed:"corolla-develop-windshield",caption:"Windshield view: resort development crowding both sides of NC-12 at Corolla."},
+    photo2:{seed:"corolla-develop-id",caption:"Identification: rooflines and parking lots leaving little open land visible from the road."} },
+  { id:"duck", routeLabel:"Duck", location:"Duck, NC", term:"Natural landform beneath the development",
+    scale:"This is a small, local pocket — but it's a preview of the site's real job on this whole northern stretch: showing you the island underneath the town.",
+    lat:36.1768, lon:-75.7530, zoom:13, mapQuestion:"How much of Duck's original landform is actually still visible from the road?",
+    q1:"Look between the buildings, where gaps open onto low dune grass or a stand of maritime shrub, rather than another storefront.",
+    q2:"Even inside a dense resort town, remnants of the island's natural dune and maritime-shrub structure are still visible in the gaps.",
+    q3:"Look for low, wind-pruned vegetation and a raised sandy ridge appearing briefly between buildings — the same dune structure you'll see undeveloped much further south.",
+    q4:"This is a small, local glimpse, not a preserved natural area — most of Duck's original dune and shrub cover has been built over.",
+    q6:"You'll keep catching glimpses like this through Kitty Hawk and Kill Devil Hills, until Jockey's Ridge gives you an uninterrupted view of the real thing.",
+    photo1:{seed:"duck-gaps-windshield",caption:"Windshield view: a gap between buildings revealing low dune grass at Duck."},
+    photo2:{seed:"duck-gaps-id",caption:"Identification: wind-pruned vegetation and a sandy ridge glimpsed between structures."} },
+  { id:"kittyhawk", routeLabel:"Kitty Hawk", location:"Kitty Hawk, NC", term:"The start of \"the Outer Banks\" as most visitors know it",
+    scale:"From here to Nags Head is the busiest, most continuously developed stretch of the entire two-journey system.",
+    lat:36.0637, lon:-75.7012, zoom:13, mapQuestion:"How does Kitty Hawk's width compare to Corolla's?",
+    q1:"Notice the highway itself: more lanes, more traffic signals, and businesses lining both sides almost without a break.",
+    q2:"This is Kitty Hawk, the northern edge of the classic \"beach town\" stretch of the Outer Banks — commercially and historically the area's front door.",
+    q3:"The commercial density is the identifying feature here, not any particular landform — signage, shopping centers, and multi-lane road all signal you're in the developed core.",
+    q4:"This pattern — dense, commercial, multi-lane — continues for roughly the next 10 miles, all the way to Whalebone Junction at the south end of Nags Head.",
+    q6:"Expect this built-up character for the next 15–20 minutes of driving.",
+    photo1:{seed:"kittyhawk-strip-windshield",caption:"Windshield view: multi-lane commercial strip through Kitty Hawk."},
+    photo2:{seed:"kittyhawk-strip-id",caption:"Identification: shopping centers and signage lining both sides of the road."} },
+  { id:"killdevilhills", routeLabel:"Kill Devil Hills", location:"Kill Devil Hills, NC — Jockey's Ridge", term:"The largest active dune system on the East Coast",
+    scale:"This is not a local curiosity — it's the largest living sand dune system on the East Coast, and it sits directly beside a commercial highway.",
+    lat:35.9585, lon:-75.6299, zoom:13, mapQuestion:"How large is this dune field compared to the town surrounding it?",
+    q1:"Watch for a tall, bare, tan-colored sand ridge rising abruptly on one side of the road, with almost no vegetation on its face.",
+    q2:"This is Jockey's Ridge — a massive active dune field, unusual because most Outer Banks dunes are much smaller and stabilized by vegetation.",
+    q3:"The giveaway is scale and bareness: this dune is tall enough to see well before you reach it, and largely un-vegetated, unlike the low, grass-covered dune ridges elsewhere on the route.",
+    q4:"Jockey's Ridge is the tallest natural sand dune system in the Eastern United States — a genuinely regional-scale feature, not a beach-town landscaping mound.",
+    q6:"It's visible for only a minute or two from the highway, but its scale is worth registering before the road returns to development on both sides.",
+    photo1:{seed:"jockeysridge-windshield",caption:"Windshield view: the bare tan face of Jockey's Ridge rising beside the highway."},
+    photo2:{seed:"jockeysridge-id",caption:"Identification: the scale and bareness that distinguish an active dune from a stabilized one."} },
+  { id:"nagshead2", routeLabel:"Nags Head", location:"Nags Head, NC — Whalebone Junction", term:"The south end of the wide, developed stretch",
+    scale:"This is the hinge point of the whole southern route: development thins out sharply from here on, and the island itself starts to narrow.",
+    lat:35.9021, lon:-75.6193, zoom:13, mapQuestion:"Where does the heavily developed stretch actually end?",
+    q1:"If you arrived via Journey 1, this is familiar ground — Whalebone Junction, where US-64 met NC-12. From here, the character of the drive changes.",
+    q2:"This is the southern edge of the continuously developed Corolla-to-Nags-Head stretch — beyond this point, NC-12 crosses much narrower, far less developed island.",
+    q3:"Watch for the traffic thinning and the buildings falling away noticeably once you're a few minutes south of the junction.",
+    q4:"Everything north of here — roughly 25 miles of barrier island — is the most heavily developed stretch on the whole two-journey system. Everything south is a different story entirely.",
+    q6:"Give it about ten minutes past this junction, and you'll reach Oregon Inlet — the first genuinely dramatic change in the landscape on this journey.",
+    photo1:{seed:"nagshead-whalebone2-windshield",caption:"Windshield view: traffic and development thinning south of Whalebone Junction."},
+    photo2:{seed:"nagshead-whalebone2-id",caption:"Identification: the last commercial buildings before open island begins."} },
+  { id:"oregoninlet", routeLabel:"Oregon Inlet", location:"Oregon Inlet — Basnight Bridge", term:"An inlet: an actual break in the barrier island chain",
+    scale:"This is the first true structural break in the barrier islands on either journey — not a sound crossing between two islands, but a gap that lets ocean and sound water meet directly.",
+    lat:35.7864, lon:-75.5285, zoom:13, mapQuestion:"How does the island's shape change on either side of this inlet?",
+    q1:"Look at the water moving beneath the bridge — often visibly turbulent or fast, unlike the calm sounds you may have crossed on Journey 1.",
+    q2:"This is Oregon Inlet, a natural break in the barrier island chain where the Atlantic Ocean and Pamlico Sound connect directly. This is the right place to introduce the term \"inlet,\" because it's the first true gap in the islands themselves.",
+    q3:"The tell is current and sand: inlets typically show visible water movement, shifting sandbars, and often a noticeably different island shape on either side, unlike a simple sound crossing.",
+    q4:"Inlets are dynamic and can open, close, or shift location over time — Oregon Inlet itself formed suddenly in a hurricane in 1846 and has moved substantially since. This is a naturally unstable, high-energy feature, not a fixed geographic point.",
+    q6:"The bridge crossing takes a couple of minutes, but the landscape it opens onto — Pea Island — is noticeably narrower and more exposed for the next several miles.",
+    photo1:{seed:"oregoninlet-windshield",caption:"Windshield view: fast-moving water beneath the Basnight Bridge at Oregon Inlet."},
+    photo2:{seed:"oregoninlet-id",caption:"Identification: shifting sandbars visible near the inlet, unlike a calm sound crossing."} },
+  { id:"peaisland", routeLabel:"Pea Island", location:"Pea Island National Wildlife Refuge", term:"A narrow, exposed island under active management",
+    scale:"Pea Island is among the narrowest, most exposed stretches on the whole route — in places, you can see both the sound and the ocean from the same spot on the road.",
+    lat:35.7150, lon:-75.4900, zoom:13, mapQuestion:"How narrow is the island here, at its narrowest point?",
+    q1:"Look both directions from the road at once: sound-side water on one side, ocean-side dune on the other, often with very little land between them.",
+    q2:"This is Pea Island — a narrow, low, overwash-prone barrier island segment, and a National Wildlife Refuge because of it.",
+    q3:"Look for an artificial dune ridge running alongside the road (built and maintained to protect the highway), and, in places, visible signs of past overwash — sand pushed inland across the road's original path.",
+    q4:"This narrow, unstable configuration is characteristic of undeveloped barrier islands generally — Pea Island shows you what much of the Outer Banks would look like without heavy development and dune stabilization holding it in place.",
+    q6:"Expect this narrow, exposed profile for the next 12–13 miles, essentially the entire length of the refuge, until villages start to reappear near Rodanthe.",
+    photo1:{seed:"peaisland-windshield",caption:"Windshield view: sound water and ocean dune visible on either side of the narrow road."},
+    photo2:{seed:"peaisland-id",caption:"Identification: an artificial dune ridge built to protect the highway from overwash."} },
+  { id:"rodanthe", routeLabel:"Rodanthe · Waves · Salvo", location:"Rodanthe, Waves, and Salvo", term:"Villages on the more stable portions of a vulnerable barrier",
+    scale:"These three villages are small and closely spaced — you'll pass through all three in well under ten minutes — but each sits on a slightly more stable stretch of an otherwise highly vulnerable island.",
+    lat:35.5972, lon:-75.4685, zoom:13, mapQuestion:"How much space actually separates these three villages?",
+    q1:"Watch for small clusters of houses, several of them raised on tall pilings, appearing between stretches of open dune and marsh.",
+    q2:"These are Rodanthe, Waves, and Salvo — historic villages that settled on the comparatively more stable portions of this exposed barrier island segment.",
+    q3:"The pilings are the tell: houses raised well above ground level are a direct, visible adaptation to a barrier island known for overwash and chronic erosion.",
+    q4:"This stretch is one of the most erosion-prone and storm-exposed on the entire North Carolina coast — the elevated construction reflects a real, ongoing vulnerability, not just a style choice.",
+    q6:"The three villages pass quickly; open, less-developed island returns south of Salvo for several miles before Avon.",
+    photo1:{seed:"rodanthe-pilings-windshield",caption:"Windshield view: houses on tall pilings at the edge of open dune, Rodanthe."},
+    photo2:{seed:"rodanthe-pilings-id",caption:"Identification: elevated construction as a visible adaptation to overwash risk."} },
+  { id:"avon", routeLabel:"Avon", location:"Avon, NC", term:"A wider, more dune-protected village",
+    scale:"Avon sits on a noticeably wider, better-protected stretch of island than the villages just north of it.",
+    lat:35.3532, lon:-75.5090, zoom:13, mapQuestion:"How much wider is the island at Avon than it was at Rodanthe?",
+    q1:"Compare the dune line here to what you saw near Rodanthe: taller, more continuous, and set further back from the houses.",
+    q2:"This is Avon, a village benefiting from a wider island cross-section and a more substantial dune ridge than its northern neighbors.",
+    q3:"Look for a clear, unbroken dune ridge running along the ocean side, with development set back behind it rather than crowding right up to it.",
+    q4:"This kind of width and dune protection varies significantly along the Banks — Avon is a useful contrast point against the narrow, exposed villages you just passed.",
+    q6:"The island narrows again as you approach Buxton and the cape — expect this wider, better-protected feel to last only another 10 minutes or so.",
+    photo1:{seed:"avon-dune-windshield",caption:"Windshield view: a tall, continuous dune ridge set back from houses at Avon."},
+    photo2:{seed:"avon-dune-id",caption:"Identification: an unbroken dune line, in contrast to the narrower profile at Rodanthe."} },
+  { id:"capehatteras", routeLabel:"Cape Hatteras", location:"Buxton, NC — Cape Hatteras", term:"Where the coastline changes direction",
+    scale:"This is a whole-coastline-scale feature: Cape Hatteras is the point where North Carolina's coast pivots, and the effects extend miles out to sea.",
+    lat:35.2530, lon:-75.5280, zoom:13, mapQuestion:"Where exactly does the coastline change direction, and by how much?",
+    q1:"Notice the road curving more sharply here than anywhere else on the route, following the island as it juts sharply eastward before turning back south.",
+    q2:"This is Cape Hatteras, one of North Carolina's three great capes — a point where the barrier island chain changes direction, and where two ocean currents meet offshore.",
+    q3:"You can't see the offshore current meeting point from the road, but the sharp change in the road's direction, and the wide beach and tall lighthouse nearby, both mark the cape itself.",
+    q4:"Cape Hatteras marks the boundary of Diamond Shoals, a shifting, dangerous sandbar system extending miles offshore — this single point has shaped centuries of shipping routes and shipwrecks along this coast.",
+    q6:"The cape's influence — wider beaches, a shifted island orientation — continues through Frisco, for the next 10–15 minutes of driving.",
+    photo1:{seed:"capehatteras-windshield",caption:"Windshield view: the road bending sharply at Cape Hatteras, wide beach beyond."},
+    photo2:{seed:"capehatteras-id",caption:"Identification: the distinctive lighthouse marking the cape's position."} },
+  { id:"frisco", routeLabel:"Frisco", location:"Frisco, NC", term:"Maritime forest, past the cape",
+    scale:"This pocket of maritime forest is a small but genuine stretch — not as extensive as Roanoke Island's, but a real contrast to the open dune and beach you've just passed.",
+    lat:35.2334, lon:-75.6310, zoom:13, mapQuestion:"How does this forest pocket compare in size to Roanoke Island's?",
+    q1:"Look for a return of taller, denser tree cover close to the road, after the open, low landscape around the cape.",
+    q2:"This is a maritime forest pocket at Frisco — salt-tolerant live oak and pine, similar in kind to what you may have seen on Roanoke Island in Journey 1, but smaller in scale here.",
+    q3:"The canopy density and height are the tell — noticeably fuller than the wind-pruned shrub thicket typical of the more exposed stretches to the north.",
+    q4:"This is a local pocket, not a regional forest system — it reflects a locally more sheltered position south of the cape's point.",
+    q6:"Expect trees for a few minutes before the road opens up again approaching Hatteras Village and the ferry docks.",
+    photo1:{seed:"frisco-forest-windshield",caption:"Windshield view: fuller tree canopy returning at Frisco, past the cape."},
+    photo2:{seed:"frisco-forest-id",caption:"Identification: live oak and pine canopy density compared to open shrub thicket."} },
+  { id:"hatterasvillage", routeLabel:"Hatteras Village", location:"Hatteras Village, NC", term:"Where the road ends",
+    scale:"This is the literal end of NC-12's pavement on Hatteras Island — everything south of here requires a boat.",
+    lat:35.2118, lon:-75.6890, zoom:13, mapQuestion:"How far is the ferry crossing, compared to the bridges you crossed earlier?",
+    q1:"Watch for the road narrowing toward the ferry terminal, with docks, waiting lanes, and ferry signage replacing ordinary roadside commerce.",
+    q2:"This is Hatteras Village, the southern terminus of Hatteras Island and the departure point for the free NC ferry to Ocracoke.",
+    q3:"Ferry infrastructure — marked lanes, schedule signage, and dock pilings — is the unmistakable identifier here, distinct from anything else on the route so far.",
+    q4:"This is the only public vehicle connection between Hatteras and Ocracoke Islands — there is no bridge, and the ferry is a genuine, unavoidable part of the route's geography.",
+    q6:"Plan for a wait here before boarding; the crossing itself takes about an hour.",
+    photo1:{seed:"hatterasvillage-windshield",caption:"Windshield view: ferry waiting lanes and dock signage at Hatteras Village."},
+    photo2:{seed:"hatterasvillage-id",caption:"Identification: dock pilings and schedule signage marking the ferry terminal."} },
+  { id:"hatterasferry", routeLabel:"Hatteras Inlet Ferry", location:"Hatteras Inlet — aboard the ferry", term:"The ferry becomes part of the geography lesson",
+    scale:"This roughly hour-long crossing covers more open water, uninterrupted, than any bridge on either journey — a scale no highway crossing on this route comes close to.",
+    lat:35.1900, lon:-75.8100, zoom:12, mapQuestion:"How much open water actually separates Hatteras and Ocracoke Islands?",
+    q1:"Step outside on deck if you can, and watch the mainland-facing view: Hatteras Island falling away behind you, open sound and inlet water on all sides.",
+    q2:"You're crossing Hatteras Inlet, another true break in the barrier chain, exactly like Oregon Inlet — this one simply isn't bridged.",
+    q3:"The evidence is all around you: this is open water in every direction, with no road, no bridge, and long stretches where neither island is clearly visible.",
+    q4:"The fact that this inlet isn't bridged — while Oregon Inlet is — reflects both the width of the inlet and the cost and difficulty of building fixed infrastructure across such an unstable feature.",
+    q6:"The crossing takes about an hour; Ocracoke Island will be visible ahead well before you actually dock.",
+    photo1:{seed:"hatterasferry-windshield",caption:"Windshield/deck view: open water in every direction, mid-crossing on the ferry."},
+    photo2:{seed:"hatterasferry-id",caption:"Identification: the wake and open channel of an unbridged inlet crossing."} },
+  { id:"ocracokeapproach", routeLabel:"Ocracoke", location:"NC-12, Ocracoke Island, north of the village", term:"A remote, undeveloped island",
+    scale:"This entire 13-mile stretch has almost no development — one of the longest undeveloped runs on either journey.",
+    lat:35.2350, lon:-75.9500, zoom:12, mapQuestion:"How long is this undeveloped stretch, compared to anything earlier on the route?",
+    q1:"Look for open dune, grassland, and maritime shrub on both sides of the road, with essentially no buildings for miles at a time.",
+    q2:"This is the undeveloped northern two-thirds of Ocracoke Island, most of it protected as part of Cape Hatteras National Seashore.",
+    q3:"The absence of development is itself the identifying feature — after the ferry, there's a long stretch with no houses, no businesses, just island landform.",
+    q4:"This kind of extended undeveloped stretch is rare on the drivable Outer Banks — most of the route north of here alternates development and open land in much shorter intervals.",
+    q6:"Expect open, undeveloped island for most of the next 20 minutes, until the road reaches Ocracoke Village at the island's southern tip.",
+    photo1:{seed:"ocracoke-approach-windshield",caption:"Windshield view: open dune and grassland with no buildings for miles, Ocracoke Island."},
+    photo2:{seed:"ocracoke-approach-id",caption:"Identification: maritime shrub and grassland typical of this protected stretch."} },
+  { id:"ocracokevillage", routeLabel:"Ocracoke", location:"Ocracoke Village", term:"A remote village, not an ocean arrival",
+    scale:"This is deliberately not a beach-arrival climax — it's the opposite: a small, historic harbor village at the end of a long, quiet island, reachable only by ferry or small plane.",
+    lat:35.1149, lon:-75.9821, zoom:14, mapQuestion:"How isolated is Ocracoke Village, compared to everywhere else on the route?",
+    q1:"Notice the harbor itself — Silver Lake — with docked boats, and a village scaled far smaller and older-feeling than any town on Journey 1 or the northern Banks.",
+    q2:"This is Ocracoke Village, a small maritime community wrapped around Silver Lake harbor, at the southern end of the drivable Outer Banks.",
+    q3:"Narrow, historic streets, a working harbor, and the absence of any highway-scale commercial strip all mark this as a genuinely different kind of place from Corolla or Kitty Hawk.",
+    q4:"Ocracoke's isolation — no bridge, limited ferry schedules — has shaped a distinct village character found nowhere else on either journey.",
+    q6:"This is the end of the drivable route. From here, continuing further south (to Portsmouth Island or Core Banks) requires a boat — offered below as an optional extension, not part of this drive.",
+    photo1:{seed:"ocracokevillage-windshield",caption:"Windshield view: docked boats around Silver Lake harbor, Ocracoke Village."},
+    photo2:{seed:"ocracokevillage-id",caption:"Identification: narrow historic streets, distinct from the highway-scale towns further north."} }
+];
+
+// ---- persisted log state ----
+const STORE_KEY = 'obxJourney2RouteLog';
+function loadState(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {logged:{}}; }catch(e){ return {logged:{}}; } }
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+let state = loadState();
+
+// ---- render route strip ----
+const rsEl = document.getElementById('routestrip');
+rsEl.innerHTML = '<div class="wrap">' + JOURNEY.map((r,i)=>
+  '<span class="rs-stop" data-idx="'+i+'">'+r+'</span>'
+).join('') + '</div>';
+
+// ---- render stops ----
+const stopsEl = document.getElementById('stops');
+stopsEl.innerHTML = STOPS.map((s,i)=>{
+  const journeyIdx = JOURNEY.indexOf(s.routeLabel);
+  const isLogged = !!state.logged[s.id];
+  return `
+  <article class="stopcard" id="stop-${s.id}" data-journey-idx="${journeyIdx}" data-stop-id="${s.id}">
+    <div class="stopcard-head">
+      <div class="meta">
+        <div class="stopno">STOP ${i+1} OF 15</div>
+        <div class="whereami"><strong>You are here:</strong> ${s.location}</div>
+        <h2>${s.term}</h2>
+        <p class="scale">${s.scale}</p>
+      </div>
+      <button class="logbtn ${isLogged?'logged':''}" data-log-id="${s.id}">${isLogged ? '✓ Logged' : 'Log it'}</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="windshield">Windshield</button>
+      <button class="tabbtn" data-tab="id">Identification</button>
+      <button class="tabbtn" data-tab="map">Aerial / Map</button>
+    </div>
+    <div class="tabpanels">
+      <div class="tabpanel active" data-panel="windshield">
+        <img src="https://picsum.photos/seed/${s.photo1.seed}/1000/700" alt="Placeholder — ${s.photo1.caption}">
+        <div class="tabcaption">${s.photo1.caption}</div>
+      </div>
+      <div class="tabpanel" data-panel="id">
+        <img src="https://picsum.photos/seed/${s.photo2.seed}/1000/700" alt="Placeholder — ${s.photo2.caption}">
+        <div class="tabcaption">${s.photo2.caption}</div>
+      </div>
+      <div class="tabpanel" data-panel="map">
+        <div class="maptier" id="map-${s.id}"></div>
+        <div class="tabcaption"><span class="mapq">Answers:</span> ${s.mapQuestion}</div>
+      </div>
+    </div>
+
+    <dl class="qrows">
+      <div class="qrow"><dt>Look for</dt><dd>${s.q1}</dd></div>
+      <div class="qrow"><dt>You're seeing</dt><dd>${s.q2}</dd></div>
+      <div class="qrow"><dt>Recognize it by</dt><dd>${s.q3}</dd></div>
+      <div class="qrow"><dt>Scale</dt><dd>${s.q4}</dd></div>
+      <div class="qrow"><dt>Where in the system</dt><dd>${s.mapQuestion}</dd></div>
+      <div class="qrow duration"><dt>How long it lasts</dt><dd>${s.q6}</dd></div>
+    </dl>
+  </article>`;
+}).join('');
+
+// ---- tabs behavior ----
+document.querySelectorAll('.stopcard').forEach(card=>{
+  const btns = card.querySelectorAll('.tabbtn');
+  const panels = card.querySelectorAll('.tabpanel');
+  btns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      btns.forEach(b=>b.classList.remove('active'));
+      panels.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = card.querySelector('.tabpanel[data-panel="'+btn.dataset.tab+'"]');
+      panel.classList.add('active');
+      if(btn.dataset.tab === 'map'){
+        const mapEl = panel.querySelector('.maptier');
+        initMapIfNeeded(mapEl);
+      }
+    });
+  });
+});
+
+function initMapIfNeeded(mapEl){
+  if(mapEl.dataset.inited) return;
+  const stopId = mapEl.id.replace('map-','');
+  const s = STOPS.find(st=>st.id===stopId);
+  if(!s) return;
+  mapEl.dataset.inited = '1';
+  const m = L.map(mapEl.id, {zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false}).setView([s.lat,s.lon], s.zoom);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(m);
+  L.marker([s.lat,s.lon]).addTo(m);
+  setTimeout(()=>m.invalidateSize(), 50);
+}
+
+// ---- log buttons ----
+function updateProgress(){
+  const count = Object.values(state.logged).filter(Boolean).length;
+  document.getElementById('pbar-fill').style.width = (count/15*100)+'%';
+  document.getElementById('pbar-count').innerHTML = '<strong>'+count+'</strong> / 15 logged';
+}
+document.querySelectorAll('.logbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const id = btn.dataset.logId;
+    state.logged[id] = !state.logged[id];
+    saveState();
+    btn.classList.toggle('logged', !!state.logged[id]);
+    btn.textContent = state.logged[id] ? '✓ Logged' : 'Log it';
+    updateProgress();
+  });
+});
+document.getElementById('resetlog').addEventListener('click', ()=>{
+  if(confirm('Clear all logged stops on this device?')){
+    state = {logged:{}};
+    saveState();
+    document.querySelectorAll('.logbtn').forEach(btn=>{
+      btn.classList.remove('logged');
+      btn.textContent = 'Log it';
+    });
+    updateProgress();
+  }
+});
+updateProgress();
+
+// ---- route strip scrollspy ----
+const rsStops = document.querySelectorAll('.rs-stop');
+const stopSections = document.querySelectorAll('.stopcard');
+const spyObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const idx = Number(entry.target.dataset.journeyIdx);
+      rsStops.forEach(r=>r.classList.toggle('active', Number(r.dataset.idx)===idx));
+      const active = document.querySelector('.rs-stop.active');
+      if(active){
+        const stripEl = document.getElementById('routestrip');
+        const targetLeft = active.offsetLeft - (stripEl.clientWidth/2) + (active.offsetWidth/2);
+        stripEl.scrollTo({ left: Math.max(0, targetLeft), behavior:'smooth' });
+      }
+    }
+  });
+}, { rootMargin: '-40% 0px -50% 0px' });
+stopSections.forEach(s=>spyObserver.observe(s));
+rsStops[0].classList.add('active');
+
+// ---- trip map ----
+const tripMap = L.map('tripmap-el', {scrollWheelZoom:false}).setView([35.6,-75.75], 8);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 17, attribution: '&copy; OpenStreetMap contributors'
+}).addTo(tripMap);
+const routeLine = STOPS.map(s=>[s.lat,s.lon]);
+L.polyline(routeLine, {color:'#c1652f', weight:3, opacity:0.75}).addTo(tripMap);
+STOPS.forEach((s,i)=>{
+  const marker = L.marker([s.lat,s.lon]).addTo(tripMap);
+  const popupEl = document.createElement('div');
+  popupEl.innerHTML = `<h4>${i+1}. ${s.term}</h4><p>${s.location}</p>`;
+  const btn = document.createElement('button');
+  btn.textContent = 'Jump to this stop';
+  btn.style.cssText = 'margin-top:6px;background:#2f7d5c;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:0.78rem;cursor:pointer;font-weight:600;';
+  btn.addEventListener('click', ()=> document.getElementById('stop-'+s.id).scrollIntoView({behavior:'smooth'}));
+  popupEl.appendChild(btn);
+  marker.bindPopup(popupEl);
+});
+</script>
+</body>
+</html>

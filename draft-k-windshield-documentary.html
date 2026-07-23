@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From the Piedmont to the Sea — a US-64 windshield documentary</title>
+<meta name="description" content="Durham to Nags Head via US-64 — a cinematic, mile-by-mile documentary of how inland North Carolina becomes the Outer Banks.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+  :root{
+    --bg:#0e1210;
+    --panel:#171b19;
+    --panel2:#1e2320;
+    --ink:#f2ece0;
+    --muted:#9c9585;
+    --muted2:#9c9585;
+    --amber:#e0a367;
+    --hwy-green:#0f4d33;
+    --hwy-green2:#0c3d29;
+    --line:#2c3330;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; overflow-x:hidden; }
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter', Arial, sans-serif; line-height:1.65; overflow-x:hidden; }
+  h1,h2,h3{ font-family:'Oswald', Arial, sans-serif; font-weight:600; letter-spacing:0.01em; text-transform:uppercase; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:var(--amber); }
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 28px; }
+  .narrow{ max-width:640px; }
+  img{ display:block; max-width:100%; }
+
+  /* highway-sign route strip, pinned at the very top */
+  .routestrip{ position:sticky; top:0; z-index:50; background:linear-gradient(180deg, var(--hwy-green) 0%, var(--hwy-green2) 100%); border-bottom:3px solid #f2ece0; overflow-x:auto; white-space:nowrap; padding:9px 0; box-shadow:0 4px 16px rgba(0,0,0,0.4); }
+  .routestrip::-webkit-scrollbar{ height:4px; }
+  .routestrip .wrap{ display:flex; align-items:center; gap:0; padding:0 20px; }
+  .rs-stop{ position:relative; padding:6px 16px; font-size:0.74rem; font-family:'IBM Plex Mono',monospace; color:#cfe8da; letter-spacing:0.03em; flex:0 0 auto; text-transform:uppercase; border-right:1px solid rgba(255,255,255,0.15); }
+  .rs-stop:last-child{ border-right:none; }
+  .rs-stop.active{ color:#fff; font-weight:700; background:rgba(255,255,255,0.08); }
+  .rs-stop.active::before{ content:'▸'; margin-right:5px; color:var(--amber); }
+
+  header.site{ background:var(--bg); border-bottom:1px solid var(--line); padding:16px 0; }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand{ font-family:'Oswald',sans-serif; font-size:1.15rem; text-transform:uppercase; letter-spacing:0.04em; }
+  .brand small{ display:block; font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.06em; text-transform:none; color:var(--muted2); margin-top:3px; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:10px 20px; font-size:0.8rem; font-family:'IBM Plex Mono',monospace; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted2); }
+  nav.site-nav a:hover{ color:var(--amber); }
+
+  /* hero: letterboxed */
+  .hero{ position:relative; height:min(84vh,700px); overflow:hidden; background:#000; }
+  .hero .letterbox{ position:absolute; left:0; right:0; height:9%; background:#000; z-index:3; }
+  .hero .letterbox.top{ top:0; }
+  .hero .letterbox.bottom{ bottom:0; }
+  .hero img{ width:100%; height:100%; object-fit:cover; opacity:0.82; filter:saturate(0.9) contrast(1.05); }
+  .hero .overlay{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(4,6,5,0.9) 0%, rgba(4,6,5,0.35) 50%, rgba(4,6,5,0.15) 100%); display:flex; flex-direction:column; justify-content:flex-end; padding:64px 28px 90px; z-index:2; }
+  .hero .inner{ max-width:1200px; margin:0 auto; width:100%; }
+  .hero .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.82rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--amber); }
+  .hero h1{ font-size:clamp(2.4rem,6.5vw,4.6rem); max-width:900px; margin-top:12px; line-height:1.05; }
+  .hero p{ max-width:600px; margin-top:16px; font-size:1.05rem; color:#d8d0bd; font-family:'Inter',sans-serif; text-transform:none; }
+  .credit{ font-size:0.68rem; color:var(--muted2); font-family:'IBM Plex Mono',monospace; }
+  .hero .credit{ position:absolute; right:16px; bottom:22px; z-index:3; }
+
+  .intro{ padding:48px 0 10px; background:var(--bg); }
+  .intro p{ font-size:1.08rem; color:#cfc7b3; font-family:'Inter',sans-serif; }
+  .intro .byline{ margin-top:12px; color:var(--muted2); font-size:0.85rem; font-family:'IBM Plex Mono',monospace; }
+  .placeholder-note{ margin-top:18px; font-size:0.78rem; color:var(--muted2); background:var(--panel); border:1px dashed var(--line); border-radius:4px; padding:10px 14px; max-width:640px; font-family:'IBM Plex Mono',monospace; }
+
+  /* stop sections — full-bleed letterboxed frame per stop */
+  .stop{ position:relative; border-top:1px solid var(--line); }
+  .stop-frame{ position:relative; height:78vh; min-height:520px; overflow:hidden; background:#000; }
+  .stop-frame .letterbox{ position:absolute; left:0; right:0; height:7%; background:#000; z-index:3; }
+  .stop-frame .letterbox.top{ top:0; } .stop-frame .letterbox.bottom{ bottom:0; }
+  .stop-frame img{ width:100%; height:100%; object-fit:cover; opacity:0.85; filter:saturate(0.92) contrast(1.05); }
+  .stop-frame .scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(4,6,5,0.92) 0%, rgba(4,6,5,0.25) 60%, rgba(4,6,5,0.05) 100%); z-index:2; }
+  .stop-frame .chapternum{ position:absolute; top:14%; right:5%; font-family:'Oswald',sans-serif; font-size:9rem; font-weight:700; color:rgba(255,255,255,0.06); z-index:2; line-height:1; }
+  .stop-frame .cap{ position:absolute; left:0; right:0; bottom:0; padding:0 28px 42px; z-index:3; }
+  .stop-frame .cap .inner{ max-width:1200px; margin:0 auto; }
+  .stopno{ font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--amber); letter-spacing:0.08em; }
+  .whereami{ font-family:'IBM Plex Mono',monospace; font-size:0.85rem; color:#cfc7b3; margin-top:10px; }
+  .whereami strong{ color:#fff; }
+  .stop-frame h2{ font-size:clamp(1.7rem,4vw,2.8rem); margin-top:8px; color:#fff; max-width:820px; }
+  .stop-frame .scale{ font-family:'Inter',sans-serif; text-transform:none; font-style:italic; color:#c9c0aa; margin-top:12px; max-width:620px; font-size:1rem; }
+  .stop-frame .tag{ position:absolute; left:28px; top:12%; z-index:3; background:rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:4px 12px; font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.06em; text-transform:uppercase; }
+
+  .stop-content{ background:var(--panel); padding:44px 0 70px; }
+  .stop-content .grid{ display:grid; grid-template-columns:1fr 340px; gap:44px; }
+  .qa{ margin-bottom:24px; padding-left:20px; border-left:2px solid var(--line); }
+  .qa .q{ font-family:'IBM Plex Mono',monospace; font-size:0.74rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--amber); margin-bottom:6px; }
+  .qa p{ font-size:1rem; color:#e2dbc9; }
+  .qa.duration{ background:var(--panel2); border-left:2px solid var(--amber); padding:16px 20px; margin-left:-20px; }
+  .qa.duration .q{ color:#fff; }
+
+  .sidebar .box{ background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:0 0 14px; margin-bottom:20px; overflow:hidden; }
+  .sidebar .box img{ width:100%; height:170px; object-fit:cover; filter:saturate(0.9); }
+  .sidebar .box .boxpad{ padding:12px 16px 0; }
+  .sidebar .box h5{ font-family:'IBM Plex Mono',monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--amber); margin-bottom:6px; }
+  .sidebar .box p{ color:#c9c0aa; font-size:0.86rem; }
+  .sidebar .maptier{ height:220px; filter:brightness(0.92) contrast(1.05); }
+  .sidebar .mapq{ font-size:0.8rem; color:#fff; font-weight:600; margin-bottom:4px; font-family:'Inter',sans-serif; }
+
+  @media (max-width:900px){
+    .stop-content .grid{ grid-template-columns:1fr; }
+    .stop-frame{ height:64vh; }
+    .stop-frame .chapternum{ font-size:5.5rem; }
+  }
+
+  /* crossing / climax */
+  .crossing{ background:#050605; padding:80px 0; border-top:3px solid var(--amber); }
+  .crossing .sec-label{ font-family:'IBM Plex Mono',monospace; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:8px; }
+  .crossing h2{ font-size:clamp(2rem,5vw,3rem); color:#fff; }
+  .crossing .scale{ font-style:italic; text-transform:none; font-family:'Inter',sans-serif; color:#c9c0aa; margin-top:12px; max-width:640px; }
+  .xwrap{ margin-top:36px; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:28px; }
+  svg.xsec{ width:100%; height:auto; display:block; }
+  .xslider{ width:100%; margin-top:20px; accent-color:var(--amber); }
+  .xlabel{ margin-top:16px; font-family:'Oswald',sans-serif; font-size:1.4rem; color:#fff; }
+  .xdesc{ margin-top:6px; color:#c9c0aa; font-size:0.95rem; max-width:600px; font-family:'Inter',sans-serif; }
+  .xzones{ margin-top:28px; }
+
+  /* trip map */
+  .tripmap{ padding:64px 0; background:var(--bg); border-top:1px solid var(--line); }
+  .map-card{ background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px; }
+  #tripmap-el{ height:440px; border-radius:4px; filter:saturate(0.95); }
+
+  footer{ border-top:1px solid var(--line); padding:34px 0 48px; background:var(--bg); }
+  footer p{ font-size:0.8rem; color:var(--muted2); max-width:640px; font-family:'IBM Plex Mono',monospace; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip{ background:#171b19; color:#f2ece0; }
+  .leaflet-popup-content h4{ margin:0 0 4px; font-family:'Oswald',sans-serif; font-size:0.95rem; }
+  .leaflet-popup-content p{ font-size:0.8rem; margin:0; color:#c9c0aa; }
+</style>
+</head>
+<body>
+
+<div class="routestrip" id="routestrip"></div>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">The Outer Banks Field Guide
+      <small>Journey 1 · Draft K — Windshield Documentary</small>
+    </div>
+    <nav class="site-nav">
+      <a href="#stops">The Journey</a>
+      <a href="#crossing">The Crossing</a>
+      <a href="#tripmap">Trip Map</a>
+      <a href="draft-k-down-the-banks.html">Episode 02</a>
+      <a href="draft-k-home.html">Home</a>
+      <a href="../index.html">All Drafts</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="letterbox top"></div>
+  <img src="https://picsum.photos/seed/obx-k-hero-piedmont/1600/1000" alt="Placeholder — rolling Piedmont hills near Durham, NC">
+  <div class="overlay">
+    <div class="inner">
+      <div class="eyebrow">Episode 01 · Durham to Nags Head · US-64 East</div>
+      <h1>From the Piedmont to the Sea</h1>
+      <p>A virtual windshield journey. Begin among the hills and red clay of the Piedmont. Follow the land as it flattens, darkens, floods, opens into sounds, and finally narrows into the Outer Banks — one mile marker at a time.</p>
+    </div>
+  </div>
+  <span class="credit">PLACEHOLDER FOOTAGE — STAND-IN STOCK IMAGERY</span>
+  <div class="letterbox bottom"></div>
+</div>
+
+<div class="wrap intro">
+  <p class="narrow">This is a windshield documentary, not an encyclopedia entry. At every stop, the question is the same: what can you actually see from the road right here, and what does that tell you about where you are? A closer identification frame and a real satellite map fill in what the windshield can't.</p>
+  <div class="byline narrow">// SCROLL THROUGH ALL 15 STOPS IN ORDER, OR JUMP AHEAD USING THE ROUTE SIGN ABOVE</div>
+  <p class="placeholder-note">// NOTE — photography throughout this draft is stand-in stock/placeholder imagery, swapped in to test pacing and layout. Real on-location, correct-season photography (the most important tier) should replace it before this concept advances.</p>
+</div>
+
+<div id="stops"></div>
+
+<section class="crossing" id="crossing">
+  <div class="wrap">
+    <div class="sec-label">// FINAL SEQUENCE</div>
+    <h2 id="x-term"></h2>
+    <p class="scale" id="x-scale"></p>
+
+    <div class="xwrap">
+      <svg class="xsec" viewBox="0 0 1200 260" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="200" height="260" fill="#28506b"/>
+        <rect x="200" y="0" width="130" height="260" fill="#3c6142"/>
+        <rect x="330" y="0" width="220" height="260" fill="#2a4a2c"/>
+        <rect x="550" y="0" width="180" height="260" fill="#a68f5e"/>
+        <rect x="730" y="0" width="240" height="260" fill="#cbb989"/>
+        <rect x="970" y="0" width="230" height="260" fill="#204863"/>
+        <text x="100" y="235" text-anchor="middle" fill="#e8ede9" font-family="IBM Plex Mono,monospace" font-size="12">SOUND</text>
+        <text x="265" y="235" text-anchor="middle" fill="#e8ede9" font-family="IBM Plex Mono,monospace" font-size="12">MARSH</text>
+        <text x="440" y="235" text-anchor="middle" fill="#e8ede9" font-family="IBM Plex Mono,monospace" font-size="12">MARITIME SHRUB</text>
+        <text x="640" y="235" text-anchor="middle" fill="#241d0f" font-family="IBM Plex Mono,monospace" font-size="12">DUNE RIDGE</text>
+        <text x="850" y="235" text-anchor="middle" fill="#241d0f" font-family="IBM Plex Mono,monospace" font-size="12">BEACH</text>
+        <text x="1085" y="235" text-anchor="middle" fill="#e8ede9" font-family="IBM Plex Mono,monospace" font-size="12">ATLANTIC OCEAN</text>
+        <g id="x-car" transform="translate(20,20)">
+          <circle r="14" fill="#e0a367" stroke="#050605" stroke-width="2"/>
+          <text x="0" y="5" text-anchor="middle" font-size="14">🚗</text>
+        </g>
+      </svg>
+      <input type="range" min="0" max="1000" value="0" class="xslider" id="x-slider" aria-label="Drag to move west to east across the island">
+      <div class="xlabel" id="x-zonelabel"></div>
+      <div class="xdesc" id="x-zonedesc"></div>
+
+      <div class="xzones">
+        <div class="qa"><div class="q">01 — What should I look for?</div><p id="x-q1"></p></div>
+        <div class="qa"><div class="q">02 — What am I seeing?</div><p id="x-q2"></p></div>
+        <div class="qa"><div class="q">03 — How can I recognize it?</div><p id="x-q3"></p></div>
+        <div class="qa"><div class="q">04 — How large or important is it?</div><p id="x-q4"></p></div>
+        <div class="qa duration"><div class="q">06 — How long will I keep seeing it?</div><p id="x-q6"></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tripmap" id="tripmap">
+  <div class="wrap">
+    <div class="stopno">// FULL ROUTE</div>
+    <h2 style="font-size:1.6rem;margin-top:8px;">Every stop, Durham to Nags Head</h2>
+    <p style="color:var(--muted2);margin-top:8px;max-width:640px;font-family:'IBM Plex Mono',monospace;font-size:0.85rem;">A real, pannable map — not an illustration — with every stop pinned in order. Click a pin to jump to that stop above.</p>
+    <div class="map-card" style="margin-top:20px;">
+      <div id="tripmap-el"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>// DRAFT K — WINDSHIELD DOCUMENTARY. PART OF THE OBX FIELD GUIDE ROAD-TRIP CONCEPT. PLACEHOLDER PHOTOGRAPHY THROUGHOUT; MAPS ARE REAL OPENSTREETMAP / ESRI WORLD IMAGERY / CARTO DATA, NOT ILLUSTRATIONS.</p>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const JOURNEY = ["Durham","Raleigh","Rocky Mount","Tarboro","Williamston","Plymouth","Columbia","Alligator River","Croatan Sound","Roanoke Island","Roanoke Sound","Nags Head","Atlantic Ocean"];
+
+const STOPS = [
+  { id:"durham", routeLabel:"Durham", location:"Durham, NC — still deep in the Piedmont", term:"The Piedmont baseline",
+    scale:"Everything here — the hills, the exposed red clay, the tight hardwood-and-pine woods — will be gone by the coast. This is the shape of North Carolina before the ocean gets involved.",
+    lat:35.994, lon:-78.898, zoom:11, mapQuestion:"Where does this trip start, relative to everything ahead of it?",
+    q1:"Watch the road itself: it rises and dips, curves around low hills, and cuts through red-orange soil wherever it's been graded.",
+    q2:"This is the Piedmont — the rolling, upland interior of North Carolina, built on old, eroded bedrock rather than young coastal sediment.",
+    q3:"Look for exposed road cuts showing reddish clay soil, closely spaced hardwood and pine trees crowding right up to the shoulder, and a horizon that's never flat for long.",
+    q4:"This isn't a Durham feature — it's the geologic character of the entire Piedmont region, roughly a third of the state, that you're about to leave behind for good.",
+    q6:"You'll be in country like this for the next hour or so, all the way past Raleigh. The change afterward will be gradual — there's no sign that says \"Piedmont ends here.\"",
+    photo1:{seed:"durham-piedmont-windshield",caption:"Windshield view: rolling hills and close hardwood/pine woods along the road, Piedmont NC."},
+    photo2:{seed:"durham-piedmont-redclay",caption:"Identification: exposed red clay in a roadside cut — the Piedmont's older, eroded soil."} },
+  { id:"raleigh", routeLabel:"Raleigh", location:"US-64, east of Raleigh (near Zebulon)", term:"The Fall Line — where the land begins to relax",
+    scale:"This is not a single ridge or river you can point to; it's a gradual softening that plays out over dozens of miles, not a landmark you'll pass in an instant.",
+    lat:35.8235, lon:-78.3128, zoom:11, mapQuestion:"Where, roughly, did the Piedmont end?",
+    q1:"Compare what's outside the window now to what you saw near Durham: the hills are lower, the curves in the road are gentler, and long straight stretches start to appear.",
+    q2:"You're crossing the Fall Line — the loose, informal boundary where the Piedmont's older upland rock gives way to the younger, flatter sediment of the Coastal Plain.",
+    q3:"There's no marker for it. The evidence is comparative: road cuts show less rock and more sandy soil, and the close woods start opening into wider fields.",
+    q4:"This transition shapes the geology and drainage of the entire eastern half of the state — every river from here to the coast behaves differently once it crosses this line.",
+    q6:"Expect the land to keep flattening for the next 60–70 miles, through Rocky Mount and Tarboro. Nothing dramatic happens today — it just keeps relaxing.",
+    photo1:{seed:"raleigh-fallline-windshield",caption:"Windshield view: lower hills and longer straight stretches east of Raleigh."},
+    photo2:{seed:"raleigh-fallline-compare",caption:"Identification: sandier road-cut soil, in contrast to the red clay seen earlier near Durham."} },
+  { id:"tarboro", routeLabel:"Rocky Mount / Tarboro", location:"Tarboro, NC — US-64 through the Inner Coastal Plain", term:"The Coastal Plain: a broad agricultural floodplain",
+    scale:"This flat, farmed land extends for many miles in every direction — it's the dominant landscape of eastern North Carolina, not a local pocket.",
+    lat:35.8996, lon:-77.5405, zoom:11, mapQuestion:"How far does this open farmland actually extend?",
+    q1:"Look for wide, open farm fields running to the horizon, and — near Tarboro — the Tar River, lined with hardwoods, cutting across the flat land.",
+    q2:"This is the Inner Coastal Plain, and the Tar River corridor at Tarboro is your first real floodplain of the trip.",
+    q3:"The tell is the abrupt band of trees crossing an otherwise open, flat farm landscape — that's the river corridor. Everywhere else, fields run edge to edge with no hills to interrupt them.",
+    q4:"This kind of flat, river-veined farmland covers most of the interior Coastal Plain — a hundred miles of it lie between here and the coast.",
+    q6:"Expect open farm country, broken by river corridors like this one, for roughly the next 45 minutes, until the land starts organizing itself more clearly around water near Williamston.",
+    photo1:{seed:"tarboro-farmland-windshield",caption:"Windshield view: open farm fields running to the horizon, Inner Coastal Plain."},
+    photo2:{seed:"tarboro-tarriver-id",caption:"Identification: the hardwood-lined Tar River corridor crossing the flat farmland."} },
+  { id:"williamston", routeLabel:"Williamston", location:"Williamston, NC — the Roanoke River corridor", term:"A major river corridor, not a stream crossing",
+    scale:"The Roanoke is one of the largest river systems draining into the sound country ahead — this crossing is a preview of the wetlands still to come.",
+    lat:35.8593, lon:-77.0561, zoom:11, mapQuestion:"How large is the floodplain this bridge actually crosses?",
+    q1:"Watch for the road narrowing between dense, low, water-tolerant trees just before and after the bridge — different from the open hardwoods you saw at Tarboro.",
+    q2:"This is bottomland hardwood swamp — a swamp, not a marsh, because it's dominated by trees rather than grasses — lining the Roanoke River.",
+    q3:"Look for trees standing in visible standing water or saturated ground close to the trunks, and a noticeably darker, denser canopy than the farmland you've been driving through.",
+    q4:"The Roanoke River floodplain is one of the largest intact bottomland hardwood forests on the East Coast — what you're crossing here is a small slice of a genuinely large system.",
+    q6:"This particular crossing lasts only a couple of minutes, but you'll see the same river-swamp pattern repeat at every water crossing between here and Plymouth.",
+    photo1:{seed:"williamston-swamp-windshield",caption:"Windshield view: the road narrowing between dense bottomland hardwoods."},
+    photo2:{seed:"williamston-swamp-id",caption:"Identification: trees standing in saturated ground near the Roanoke River."} },
+  { id:"plymouth", routeLabel:"Plymouth", location:"Plymouth, NC — where the Roanoke River meets the sound country", term:"Water starts organizing the landscape",
+    scale:"From here on, rivers and drainage — not hills or farmland — are the main thing shaping what you see out the window.",
+    lat:35.8657, lon:-76.7469, zoom:11, mapQuestion:"How does the river change as it nears Albemarle Sound?",
+    q1:"Notice how often the road now runs alongside visible water, drainage ditches, or low wet ground, instead of just crossing it briefly.",
+    q2:"You're at the point where the Roanoke River widens toward Albemarle Sound — the landscape is transitioning from \"land with rivers in it\" to \"land shaped by water.\"",
+    q3:"Look for long, straight drainage ditches running parallel to the road (common land-management infrastructure in this region) and standing water visible even away from the river itself.",
+    q4:"This shift marks your entry into the Outer Coastal Plain / Tidewater region — flatter, wetter, and far more water-dominated than anything you've crossed so far.",
+    q6:"Expect water — ditches, wet woods, the river itself — to be visible from the road almost continuously for the rest of the drive to the coast.",
+    photo1:{seed:"plymouth-tidewater-windshield",caption:"Windshield view: drainage ditches running parallel to the road near Plymouth."},
+    photo2:{seed:"plymouth-tidewater-id",caption:"Identification: standing water visible in the wet woods away from the river channel."} },
+  { id:"columbia", routeLabel:"Columbia", location:"Columbia, NC — the last clearly settled mainland town", term:"The edge of the settled mainland",
+    scale:"After this, towns give way to miles of undeveloped wetland — this is your last stretch of concentrated buildings before the coast.",
+    lat:35.9179, lon:-76.2530, zoom:12, mapQuestion:"How much settled land is actually left before the coast?",
+    q1:"Take in the town itself — storefronts, the Scuppernong River waterfront — because the density of buildings drops off sharply once you're past it.",
+    q2:"Columbia sits at the edge of the Scuppernong River, right where mainland settlement runs out and the wetlands of the Alligator River area begin.",
+    q3:"There's no ambiguity here — it's a compact, recognizable small town. The identification matters more for what comes after: watch how quickly buildings thin out east of town.",
+    q4:"This is the last town of any size on the mainland portion of the route — everything between here and the coast is sparsely populated wetland and refuge land.",
+    q6:"Give it five minutes after leaving Columbia, and the buildings will be gone. What replaces them is wet forest and, eventually, the Alligator River itself.",
+    photo1:{seed:"columbia-nc-windshield",caption:"Windshield view: Columbia's small-town main street along the Scuppernong River."},
+    photo2:{seed:"columbia-nc-id",caption:"Identification: the density of buildings, for comparison with what follows."} },
+  { id:"pocosin", routeLabel:"Alligator River", location:"US-64, east of Columbia — inside the Alligator River basin", term:"Wet forest and pocosin country",
+    scale:"This kind of dense, wet, shrubby wetland covers much of the land between Columbia and the Alligator River — you'll be inside it for close to half an hour.",
+    lat:35.8300, lon:-76.0800, zoom:11, mapQuestion:"How much of this refuge is actually pocosin versus open water?",
+    q1:"Watch for two different textures out the window: tall wet forest with standing water at the tree bases, and, in places, a lower, denser wall of evergreen shrubs that looks almost impenetrable.",
+    q2:"The tall, wet, tree-dominated sections are swamp forest. The dense shrub sections, where you can see them, are characteristic of pocosin — a shrubby, peat-based wetland type this refuge is known for.",
+    q3:"Swamp: you can still make out individual tree trunks, often standing in water. Pocosin: the vegetation reads as a solid, low, tangled wall of evergreen shrubs rather than distinct trees — easy to mistake for \"just bushes\" at 55 mph.",
+    q4:"Pocosin is a distinctive North Carolina wetland type, and the land here — largely inside the Alligator River National Wildlife Refuge — is one of its best-known strongholds, not an incidental patch of brush.",
+    q6:"This mixed wet-forest-and-pocosin texture will dominate the view for most of the next 20–25 minutes, until the trees start thinning near the ghost forests ahead.",
+    photo1:{seed:"pocosin-refuge-windshield",caption:"Windshield view: dense evergreen shrub thicket bordering the highway."},
+    photo2:{seed:"pocosin-refuge-id",caption:"Identification: the wall-like texture that distinguishes pocosin from swamp forest."} },
+  { id:"ghostforest", routeLabel:"Alligator River", location:"US-64, approaching the Alligator River", term:"Salt-killed ghost forest",
+    scale:"These are small, scattered patches for now — the much larger ghost forest you'll see is still ahead, near the river crossing itself.",
+    lat:35.8150, lon:-75.9700, zoom:12, mapQuestion:"How close is this patch to the open water that's likely killing it?",
+    q1:"Watch for pale, bare trunks — no leaves, no bark in places — standing above shorter, greener marsh vegetation, usually on one side of the road.",
+    q2:"This is a salt-killed ghost forest: standing dead trees, usually cedar or pine, killed by saltwater intrusion into soil that used to be fresh enough to support them.",
+    q3:"The giveaway is the contrast — bleached, branchless trunks rising out of living marsh grass around their base. A live forest doesn't look like this; a clear-cut doesn't leave standing trunks.",
+    q4:"This is a small, local preview. Ghost forest becomes a much more prominent feature of the view right around the Alligator River crossing, where rising water has killed trees over a much larger area.",
+    q6:"You'll see more of these, and larger stands of them, in the next five minutes as you approach the bridge.",
+    photo1:{seed:"ghostforest-windshield",caption:"Windshield view: bleached standing trunks above marsh grass, passenger side."},
+    photo2:{seed:"ghostforest-id",caption:"Identification: close-up contrast between dead trunks and living marsh vegetation at their base."} },
+  { id:"alligator", routeLabel:"Alligator River", location:"The Alligator River — Lindsay C. Warren Bridge", term:"Your first estuary",
+    scale:"This is the first genuinely enormous open-water crossing of the trip — nothing you've crossed so far has come close to this scale.",
+    lat:35.8107, lon:-75.9165, zoom:12, mapQuestion:"How wide is the water you just crossed, compared to the land on either side?",
+    q1:"Look out at the full width of the water as you cross — this isn't a river you could see across a few minutes ago; it opens up right at the bridge.",
+    q2:"This is the Alligator River, and where it meets the sound system beyond, it forms an estuary — a place where fresh water flowing off the land mixes with salt water pushing in from the ocean. This is the right point in the trip to introduce that term, because it's the first place fresh and salt water are visibly mixing at scale.",
+    q3:"You can't tell salinity by looking, but the scale is the tell: this kind of wide, slow, open water — well beyond what a river needs just to drain the land — signals a tidal, mixed-water system rather than a simple freshwater river.",
+    q4:"The Alligator River and its surrounding wetlands are one of the largest undeveloped estuarine systems on the East Coast — this bridge crosses only a fraction of it.",
+    q6:"The crossing itself takes about two minutes, but the low, wet mainland on the far side — before Manns Harbor — is still part of the same system for another 15–20 minutes.",
+    photo1:{seed:"alligatorriver-windshield",caption:"Windshield view: open water stretching to the horizon from the bridge."},
+    photo2:{seed:"alligatorriver-id",caption:"Identification: the scale of open water versus the narrow river seen further inland."} },
+  { id:"mannsharbor", routeLabel:"Croatan Sound", location:"US-64, Dare mainland, between the Alligator River and Manns Harbor", term:"The last stretch of low mainland",
+    scale:"This is a narrow, low buffer of land — not a return to solid ground — between two large water systems.",
+    lat:35.8550, lon:-75.7650, zoom:11, mapQuestion:"How narrow is this last piece of mainland, sound to sound?",
+    q1:"Notice how low and flat everything is, and how often you can see water or wet ground on both sides of the road at once.",
+    q2:"You're on a narrow band of low mainland, still part of the greater Albemarle-Pamlico estuarine system, between the Alligator River you just crossed and Croatan Sound ahead.",
+    q3:"Unlike the farmland near Tarboro, there's no dry margin here — wet ground, ditches, and low pine/pocosin vegetation crowd the road on both sides.",
+    q4:"This strip is part of the same low, water-dominated mainland pattern that defines Dare County's mainland portion — it's a preview of the sound crossing coming up, not a break from it.",
+    q6:"This lasts about 10–15 minutes before the road reaches Manns Harbor and the much larger open water of Croatan Sound comes into view.",
+    photo1:{seed:"mannsharbor-windshield",caption:"Windshield view: low wet ground crowding both sides of the road."},
+    photo2:{seed:"mannsharbor-id",caption:"Identification: ditches and low pocosin vegetation on the narrow mainland strip."} },
+  { id:"croatan", routeLabel:"Croatan Sound", location:"Croatan Sound — Virginia Dare Memorial Bridge", term:"Your first sound crossing",
+    scale:"This is a different kind of water than the Alligator River — a sound, not a river mouth — and it's the last mainland water you'll cross before reaching an island.",
+    lat:35.9100, lon:-75.6850, zoom:12, mapQuestion:"Which sound is beneath this bridge, and what does it connect?",
+    q1:"Look at the water itself: no clear current direction, open in both directions along the bridge, with Roanoke Island visible ahead.",
+    q2:"This is Croatan Sound, one of the interconnected sounds that sit behind the Outer Banks, separating the mainland from Roanoke Island.",
+    q3:"Sounds read differently from rivers: the water extends broadly parallel to the barrier islands rather than draining toward one visible outlet, and you can often see land on multiple sides rather than just banks on either side of a channel.",
+    q4:"Croatan Sound is part of the larger Albemarle-Pamlico Sound system, the second-largest estuarine system in the continental U.S. — this bridge crosses one arm of something far larger than what's visible from the road.",
+    q6:"The crossing takes a few minutes; on the far side, you're on Roanoke Island — not yet a barrier island, but the last stop before one.",
+    photo1:{seed:"croatansound-windshield",caption:"Windshield view: open sound water on both sides of the bridge."},
+    photo2:{seed:"croatansound-id",caption:"Identification: the broad, current-less water surface typical of a sound."} },
+  { id:"roanokeisland", routeLabel:"Roanoke Island", location:"Roanoke Island — Manteo", term:"Maritime forest, not yet a barrier island",
+    scale:"This is worth calling out specifically: Roanoke Island sits between two sounds, protected from direct ocean exposure — it is not itself a barrier island, and its forest looks correspondingly less wind-shaped.",
+    lat:35.9082, lon:-75.6707, zoom:12, mapQuestion:"What is protecting this island from direct ocean exposure?",
+    q1:"Notice the taller, fuller tree canopy here compared to what you'll see once you cross onto Bodie Island — this is a more sheltered kind of coastal forest.",
+    q2:"This is maritime forest: a coastal woodland of live oak, loblolly pine, and other salt-tolerant hardwoods, shaped by salt spray but not by direct ocean wave or wind exposure.",
+    q3:"Look for a relatively even, continuous canopy rather than low, wind-pruned, sculpted vegetation — that sculpting is a barrier-island feature you haven't reached yet.",
+    q4:"Roanoke Island's position — shielded by Bodie Island to the east — is exactly why it developed this fuller forest and supported the earliest English settlement attempts in the region, rather than being a bare, shifting sandbar.",
+    q6:"You'll be on the island, in this kind of forest and town, for about ten minutes before the next sound crossing takes you onto the actual barrier island chain.",
+    photo1:{seed:"roanokeisland-windshield",caption:"Windshield view: a full, even maritime-forest canopy over the road."},
+    photo2:{seed:"roanokeisland-id",caption:"Identification: live oak and loblolly pine canopy, unsculpted by direct ocean wind."} },
+  { id:"roanokesound", routeLabel:"Roanoke Sound", location:"Roanoke Sound — Washington Baum Bridge", term:"The last crossing before the barrier islands",
+    scale:"This is a shorter, narrower crossing than Croatan Sound, but it's the one that actually puts you on a barrier island.",
+    lat:35.8879, lon:-75.6390, zoom:12, mapQuestion:"How wide is the island you're about to land on, compared to the sound you just crossed?",
+    q1:"Watch the far shore as you cross — low, sandy, and noticeably different in profile from Roanoke Island behind you.",
+    q2:"This is Roanoke Sound, the water separating Roanoke Island from Bodie Island — the barrier island you're about to arrive on.",
+    q3:"The tell is what's waiting on the other side: instead of another forested shoreline, you'll see low dune vegetation and, soon after, development sitting directly on a narrow strip of sand.",
+    q4:"This sound is narrower than Croatan Sound, but it marks the true boundary between mainland-adjacent Roanoke Island and the open-ocean-facing barrier island system.",
+    q6:"Within a couple of minutes of finishing this bridge, you'll be standing on Bodie Island — even if it doesn't immediately look like one.",
+    photo1:{seed:"roanokesound-windshield",caption:"Windshield view: the low, sandy far shore of Bodie Island ahead."},
+    photo2:{seed:"roanokesound-id",caption:"Identification: low dune vegetation replacing forested shoreline."} },
+  { id:"nagshead-arrival", routeLabel:"Nags Head", location:"Whalebone Junction — Bodie Island / Nags Head", term:"A barrier island, even though it may not look like one",
+    scale:"Development can make a barrier island hard to recognize — the geology hasn't gone anywhere, it's just built over.",
+    lat:35.9021, lon:-75.6193, zoom:13, mapQuestion:"How narrow is the island here, sound to ocean, compared to how it looks from the road?",
+    q1:"Look past the shops, motels, and traffic signals for the shape of the land itself: how narrow it is between the highway's east and west sides.",
+    q2:"You have arrived on Bodie Island, part of the Outer Banks barrier island chain — even though what surrounds you right now reads as a beach town commercial strip, not obvious \"nature.\"",
+    q3:"The evidence is width, not vegetation: check how little distance separates sound-side water from ocean-side water here. That narrowness, not the absence of buildings, is what makes this a barrier island.",
+    q4:"This is the single most-visited barrier island in the system, but the same physical vulnerability — a narrow strip of sand between two bodies of water — applies here as much as it does to the undeveloped stretches further south.",
+    q6:"The final stop, just ahead, crosses this same narrow width — but this time on foot or by eye, from the sound side to the ocean itself.",
+    photo1:{seed:"nagshead-arrival-windshield",caption:"Windshield view: shops and motels along the commercial strip at Whalebone Junction."},
+    photo2:{seed:"nagshead-arrival-id",caption:"Identification: how little distance separates the visible sound side from the ocean side here."} }
+];
+
+const CROSSING = {
+  location:"Nags Head — sound to ocean", term:"The full width of a barrier island, in one crossing",
+  scale:"This is the shortest crossing of the entire trip, and the one that puts everything else in the drive in perspective: an entire barrier island can be this narrow.",
+  lat:35.9573, lon:-75.6249,
+  q1:"As you cross from the sound (west) side of the island to the ocean (east) side, track what's beneath and around you in order: open sound water, marsh, low maritime shrub, remnant dune, the frontal dune ridge, and finally the beach and open ocean.",
+  q2:"This is a complete west-to-east cross-section of a barrier island — every zone you'd otherwise have to visit separately, compressed into one short crossing.",
+  q3:"Each zone has its own signature: marsh grasses at the sound edge, low wind-pruned shrub thicket behind the dunes, a raised sandy dune ridge (sometimes stabilized with grass or construction), and finally open sand sloping to the water.",
+  q4:"This entire sequence — everything separating two very different bodies of water — plays out over less than a mile. It's the clearest single illustration on the whole route of how little land stands between the sound and the Atlantic.",
+  q6:"This is the last stop. From here, the journey answers its own question: an inland Piedmont landscape, over about 200 miles, gradually became this — a few hundred feet of sand separating a sound from the ocean.",
+  zones:[
+    {key:"sound",label:"Sound",desc:"Open, calm water on the west side of the island — the sheltered side, facing the mainland.",range:[0,150]},
+    {key:"marsh",label:"Marsh",desc:"Grasses and sedges rooted in soft, saturated ground at the sound's edge.",range:[150,300]},
+    {key:"shrub",label:"Maritime shrub",desc:"Low, wind-pruned thicket — salt-tolerant shrubs sculpted flat by onshore wind.",range:[300,530]},
+    {key:"dune",label:"Dune ridge",desc:"The raised, sandy backbone of the island — the last real barrier before the open beach.",range:[530,710]},
+    {key:"beach",label:"Beach",desc:"Bare open sand sloping down toward the water — no vegetation can hold here.",range:[710,940]},
+    {key:"ocean",label:"Atlantic Ocean",desc:"Open ocean on the east side — the barrier island's outer, exposed edge.",range:[940,1000]}
+  ]
+};
+
+// ---- render route strip (highway sign) ----
+const rsEl = document.getElementById('routestrip');
+rsEl.innerHTML = '<div class="wrap">' + JOURNEY.map((r,i)=>
+  '<span class="rs-stop" data-idx="'+i+'">'+r+'</span>'
+).join('') + '</div>';
+
+// ---- render stops ----
+const stopsEl = document.getElementById('stops');
+stopsEl.innerHTML = STOPS.map((s,i)=>{
+  const journeyIdx = JOURNEY.indexOf(s.routeLabel);
+  return `
+  <section class="stop" id="stop-${s.id}" data-journey-idx="${journeyIdx}">
+    <div class="stop-frame">
+      <div class="letterbox top"></div>
+      <img src="https://picsum.photos/seed/${s.photo1.seed}/1400/900" alt="Placeholder — ${s.photo1.caption}">
+      <div class="scrim"></div>
+      <div class="chapternum">${String(i+1).padStart(2,'0')}</div>
+      <span class="tag">Windshield frame</span>
+      <div class="cap">
+        <div class="inner">
+          <div class="stopno">STOP ${String(i+1).padStart(2,'0')} / 15</div>
+          <div class="whereami"><strong>You are here:</strong> ${s.location}</div>
+          <h2>${s.term}</h2>
+          <p class="scale">${s.scale}</p>
+        </div>
+      </div>
+      <div class="letterbox bottom"></div>
+    </div>
+    <div class="stop-content">
+      <div class="wrap grid">
+        <div class="main">
+          <div class="qa"><div class="q">01 — What should I look for?</div><p>${s.q1}</p></div>
+          <div class="qa"><div class="q">02 — What am I seeing?</div><p>${s.q2}</p></div>
+          <div class="qa"><div class="q">03 — How can I recognize it?</div><p>${s.q3}</p></div>
+          <div class="qa"><div class="q">04 — How large or important is it?</div><p>${s.q4}</p></div>
+          <div class="qa duration"><div class="q">06 — How long will I keep seeing it?</div><p>${s.q6}</p></div>
+        </div>
+        <div class="sidebar">
+          <div class="box">
+            <img src="https://picsum.photos/seed/${s.photo2.seed}/800/600" alt="Placeholder — ${s.photo2.caption}">
+            <div class="boxpad">
+              <h5>Identification frame</h5>
+              <p>${s.photo2.caption}</p>
+            </div>
+          </div>
+          <div class="box">
+            <div class="boxpad">
+              <h5>05 — Where am I within the larger system?</h5>
+              <div class="mapq">${s.mapQuestion}</div>
+            </div>
+            <div class="maptier" id="map-${s.id}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}).join('');
+
+// ---- crossing section text ----
+document.getElementById('x-term').textContent = CROSSING.term;
+document.getElementById('x-scale').textContent = CROSSING.scale;
+document.getElementById('x-q1').textContent = CROSSING.q1;
+document.getElementById('x-q2').textContent = CROSSING.q2;
+document.getElementById('x-q3').textContent = CROSSING.q3;
+document.getElementById('x-q4').textContent = CROSSING.q4;
+document.getElementById('x-q6').textContent = CROSSING.q6;
+
+const xSlider = document.getElementById('x-slider');
+const xCar = document.getElementById('x-car');
+const xLabel = document.getElementById('x-zonelabel');
+const xDesc = document.getElementById('x-zonedesc');
+function xUpdate(){
+  const v = Number(xSlider.value);
+  const px = (v/1000)*1160 + 20;
+  xCar.setAttribute('transform','translate('+px+',20)');
+  const zone = CROSSING.zones.find(z=> v>=z.range[0] && v<=z.range[1]) || CROSSING.zones[0];
+  xLabel.textContent = zone.label;
+  xDesc.textContent = zone.desc;
+}
+xSlider.addEventListener('input', xUpdate);
+xUpdate();
+
+// ---- lazy leaflet maps per stop (real satellite imagery) ----
+const mapObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = entry.target.id;
+      const s = STOPS.find(st=>('map-'+st.id)===id);
+      if(s && !entry.target.dataset.inited){
+        entry.target.dataset.inited = '1';
+        const m = L.map(id, {zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false}).setView([s.lat,s.lon], s.zoom);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 18
+        }).addTo(m);
+        L.marker([s.lat,s.lon]).addTo(m);
+      }
+      mapObserver.unobserve(entry.target);
+    }
+  });
+}, { rootMargin: '200px' });
+document.querySelectorAll('.maptier').forEach(el=>mapObserver.observe(el));
+
+// ---- route strip scrollspy ----
+const rsStops = document.querySelectorAll('.rs-stop');
+const stopSections = document.querySelectorAll('.stop');
+const spyObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const idx = Number(entry.target.dataset.journeyIdx);
+      rsStops.forEach(r=>r.classList.toggle('active', Number(r.dataset.idx)===idx));
+      const active = document.querySelector('.rs-stop.active');
+      if(active){
+        const stripEl = document.getElementById('routestrip');
+        const targetLeft = active.offsetLeft - (stripEl.clientWidth/2) + (active.offsetWidth/2);
+        stripEl.scrollTo({ left: Math.max(0, targetLeft), behavior:'smooth' });
+      }
+    }
+  });
+}, { rootMargin: '-45% 0px -45% 0px' });
+stopSections.forEach(s=>spyObserver.observe(s));
+rsStops[0].classList.add('active');
+
+// ---- trip map (dark, cinematic basemap) ----
+const tripMap = L.map('tripmap-el', {scrollWheelZoom:false}).setView([35.86,-77.1], 8);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 18, attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+}).addTo(tripMap);
+const routeLine = STOPS.map(s=>[s.lat,s.lon]).concat([[CROSSING.lat, CROSSING.lon]]);
+L.polyline(routeLine, {color:'#e0a367', weight:3, opacity:0.85}).addTo(tripMap);
+STOPS.forEach((s,i)=>{
+  const marker = L.circleMarker([s.lat,s.lon], {radius:6, color:'#e0a367', fillColor:'#e0a367', fillOpacity:1, weight:2}).addTo(tripMap);
+  const popupEl = document.createElement('div');
+  popupEl.innerHTML = `<h4>${String(i+1).padStart(2,'0')}. ${s.term}</h4><p>${s.location}</p>`;
+  const btn = document.createElement('button');
+  btn.textContent = 'Jump to this stop';
+  btn.style.cssText = 'margin-top:6px;background:#e0a367;color:#050605;border:none;border-radius:3px;padding:5px 10px;font-size:0.75rem;font-family:IBM Plex Mono,monospace;cursor:pointer;font-weight:600;';
+  btn.addEventListener('click', ()=> document.getElementById('stop-'+s.id).scrollIntoView({behavior:'smooth'}));
+  popupEl.appendChild(btn);
+  marker.bindPopup(popupEl);
+});
+L.circleMarker([CROSSING.lat, CROSSING.lon], {radius:7, color:'#fff', fillColor:'#e0a367', fillOpacity:1, weight:2}).addTo(tripMap).bindPopup('<h4>15. '+CROSSING.term+'</h4><p>'+CROSSING.location+'</p>');
+</script>
+</body>
+</html>

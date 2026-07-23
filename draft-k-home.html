@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Outer Banks Field Guide — a road trip, not a taxonomy</title>
+<meta name="description" content="Two road trips that teach North Carolina's coast the way you'd actually experience it: driving there, and driving the length of it.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1210;
+    --panel:#171b19;
+    --panel2:#1e2320;
+    --ink:#f2ece0;
+    --muted:#9c9585;
+    --muted2:#9c9585;
+    --amber:#e0a367;
+    --hwy-green:#0f4d33;
+    --hwy-green2:#0c3d29;
+    --line:#2c3330;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; overflow-x:hidden; }
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter', Arial, sans-serif; line-height:1.65; overflow-x:hidden; }
+  h1,h2,h3{ font-family:'Oswald', Arial, sans-serif; font-weight:600; letter-spacing:0.01em; text-transform:uppercase; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:var(--amber); }
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 28px; }
+  .narrow{ max-width:640px; }
+  img{ display:block; max-width:100%; }
+
+  header.site{ background:var(--bg); border-bottom:1px solid var(--line); padding:16px 0; }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand{ font-family:'Oswald',sans-serif; font-size:1.15rem; text-transform:uppercase; letter-spacing:0.04em; }
+  .brand small{ display:block; font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:0.06em; text-transform:none; color:var(--muted2); margin-top:3px; }
+  nav.site-nav{ display:flex; flex-wrap:wrap; gap:10px 20px; font-size:0.8rem; font-family:'IBM Plex Mono',monospace; }
+  nav.site-nav a{ text-decoration:none; color:var(--muted2); }
+  nav.site-nav a:hover{ color:var(--amber); }
+
+  .intro{ padding:60px 0 20px; }
+  .intro .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.82rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); }
+  .intro h1{ font-size:clamp(2.1rem,5.5vw,3.4rem); max-width:880px; margin-top:14px; line-height:1.15; }
+  .intro p{ max-width:680px; margin-top:16px; font-size:1.05rem; color:#cfc7b3; font-family:'Inter',sans-serif; text-transform:none; }
+
+  .entries{ padding:44px 0 60px; }
+  .entry-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media (max-width:900px){ .entry-grid{ grid-template-columns:1fr; } }
+  a.entry{ position:relative; display:block; height:70vh; min-height:480px; overflow:hidden; text-decoration:none; color:#fff; background:#000; border:1px solid var(--line); }
+  a.entry .letterbox{ position:absolute; left:0; right:0; height:8%; background:#000; z-index:3; }
+  a.entry .letterbox.top{ top:0; } a.entry .letterbox.bottom{ bottom:0; }
+  a.entry img{ width:100%; height:100%; object-fit:cover; opacity:0.85; filter:saturate(0.9) contrast(1.05); transition:transform 0.4s ease; }
+  a.entry:hover img{ transform:scale(1.04); }
+  a.entry .scrim{ position:absolute; inset:0; background:linear-gradient(0deg, rgba(4,6,5,0.92) 0%, rgba(4,6,5,0.3) 55%, rgba(4,6,5,0.08) 100%); z-index:2; }
+  a.entry .epnum{ position:absolute; top:14%; right:6%; font-family:'Oswald',sans-serif; font-size:7rem; font-weight:700; color:rgba(255,255,255,0.07); z-index:2; }
+  a.entry .cap{ position:absolute; left:0; right:0; bottom:0; padding:32px; z-index:3; }
+  a.entry .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--amber); letter-spacing:0.08em; }
+  a.entry h2{ font-size:clamp(1.6rem,3vw,2.3rem); margin-top:10px; color:#fff; }
+  a.entry p{ margin-top:12px; font-size:0.96rem; color:#d8d0bd; max-width:440px; font-family:'Inter',sans-serif; text-transform:none; }
+  a.entry .go{ margin-top:20px; font-family:'IBM Plex Mono',monospace; font-size:0.8rem; font-weight:700; color:#fff; display:inline-flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.05em; }
+  a.entry .credit{ position:absolute; right:14px; bottom:10%; font-size:0.66rem; color:var(--muted2); font-family:'IBM Plex Mono',monospace; z-index:3; }
+
+  .connective{ padding:20px 0 60px; }
+  .connective .box{ background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:26px 30px; max-width:840px; }
+  .connective .box p{ font-size:0.96rem; color:#cfc7b3; font-family:'Inter',sans-serif; }
+  .connective .box p + p{ margin-top:12px; }
+
+  .placeholder-note{ margin-top:14px; font-size:0.78rem; color:var(--muted2); background:var(--panel); border:1px dashed var(--line); border-radius:4px; padding:10px 14px; max-width:640px; font-family:'IBM Plex Mono',monospace; }
+
+  footer{ border-top:1px solid var(--line); padding:34px 0 48px; background:var(--bg); }
+  footer p{ font-size:0.8rem; color:var(--muted2); max-width:640px; font-family:'IBM Plex Mono',monospace; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">The Outer Banks Field Guide
+      <small>Road-Trip Concept · Draft Q — Windshield Documentary</small>
+    </div>
+    <nav class="site-nav">
+      <a href="draft-k-windshield-documentary.html">Episode 01</a>
+      <a href="draft-k-down-the-banks.html">Episode 02</a>
+      <a href="../index.html">All Drafts</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap intro">
+  <div class="eyebrow">A VIRTUAL WINDSHIELD JOURNEY</div>
+  <h1>North Carolina's coast, the way you'd actually meet it — from a car window.</h1>
+  <p class="narrow">Not the seven natural zones, arranged like an encyclopedia. Two literal road trips, narrated like a documentary tour guide. At every stop, the question is the same: what can you see from the road right here, and what does that tell you about where you are?</p>
+</div>
+
+<section class="entries">
+  <div class="wrap entry-grid">
+    <a class="entry" href="draft-k-windshield-documentary.html">
+      <div class="letterbox top"></div>
+      <img src="https://picsum.photos/seed/obx-home-q-journey1/1200/1400" alt="Placeholder — rolling Piedmont hills near Durham, NC">
+      <div class="scrim"></div>
+      <div class="epnum">01</div>
+      <div class="cap">
+        <div class="eyebrow">Episode 01 · Durham to Nags Head · US-64 East</div>
+        <h2>Watch North Carolina Become Coastal</h2>
+        <p>Begin among the hills and red clay of the Piedmont. Follow the land as it flattens, darkens, floods, opens into sounds, and finally narrows into the Outer Banks.</p>
+        <span class="go">▸ Start Episode 01</span>
+      </div>
+      <span class="credit">PLACEHOLDER FOOTAGE</span>
+      <div class="letterbox bottom"></div>
+    </a>
+    <a class="entry" href="draft-k-down-the-banks.html">
+      <div class="letterbox top"></div>
+      <img src="https://picsum.photos/seed/obx-home-q-journey2/1200/1400" alt="Placeholder — wide developed barrier island near Corolla, NC">
+      <div class="scrim"></div>
+      <div class="epnum">02</div>
+      <div class="cap">
+        <div class="eyebrow">Episode 02 · Corolla to Ocracoke · NC-12 South</div>
+        <h2>Travel the Length of the Banks</h2>
+        <p>Follow the barrier islands through maritime forests, beach towns, dunes, marshes, inlets, capes, storm-shaped islands, and a ferry crossing to Ocracoke.</p>
+        <span class="go">▸ Start Episode 02</span>
+      </div>
+      <span class="credit">PLACEHOLDER FOOTAGE</span>
+      <div class="letterbox bottom"></div>
+    </a>
+  </div>
+</section>
+
+<section class="connective">
+  <div class="wrap">
+    <div class="box">
+      <p>Someone driving from Raleigh can follow Episode 01 in real time, stop by stop, all the way to the beach. Someone already staying in Nags Head can skip straight to Episode 02 and start reading the islands they're standing on.</p>
+      <p>Episode 01 covers how you enter the coastal system — inland Piedmont, through the Coastal Plain, into wetlands, an estuary, two sounds, and finally a barrier island. Episode 02 covers how to read the coastal system once you're inside it — how the islands themselves vary in width, development, vegetation, exposure, and orientation as you travel their length.</p>
+    </div>
+    <p class="placeholder-note">// NOTE — photography throughout this concept is stand-in stock/placeholder imagery. Real on-location, correct-season photography should replace it before this concept advances.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>// DRAFT Q — WINDSHIELD DOCUMENTARY, HOMEPAGE. PART OF THE OBX FIELD GUIDE ROAD-TRIP CONCEPT.</p>
+  </div>
+</footer>
+
+</body>
+</html>
